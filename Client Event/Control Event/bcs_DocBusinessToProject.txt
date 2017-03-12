@@ -1,0 +1,112 @@
+//Creator:Panda
+//Name:bcs_DocBusinessToProject
+//Type:JavaScript
+//Event: Field Event => onClick 
+//Comments:v0.1 Developed By Panda @ 2016/11/16
+//         v0.2 Developed By Panda @ 2016/11/25
+//目的:在表單上建立按鈕，可立即新增Project物件
+//     1.判斷此帳號是否可以新增的權限
+//     2.選擇正確的DCO類別並新增Project物件
+//===============================================================
+//======公開程式碼不負責維護，只提供程式參考與學習===============
+
+//===================基本宣告================
+var a=top.aras;
+var item = document.thisItem;
+var inn= new Innovator;
+var userAlias=inn.getUserAliases();
+var userID=top.aras.getUserID();
+var CanAdd=singleAML("Can Add","get","source_id","02184EDAA80D499CB6EC94B159966DBE");//Project ID
+var checkProjectItem=singleAML("Project","get","cn_document",item.getProperty("id"));
+var newProjNum=a.getNextSequence("","Project Number");
+
+var checkflag=false;
+//===================內部事件================
+function singleAML(itemtype,action,property,value){
+	var AML ="<AML><Item type='"+itemtype+"' action='"+action+"'>"
+	+"<"+property+">"+value+"</"+property+">"
+	+"</Item></AML>";
+	var itemXML=inn.applyAML(AML);
+	return itemXML;
+}
+function check_CanAdd(CanAddArray,userAlias){
+	var related_item=CanAddArray.getItemsByXPath("//Item/related_id/Item");
+	for(var i=0;i<related_item.getItemCount();i++){
+		var tempItem= CanAddArray.getItemByIndex(i);
+		console.log(tempItem.getProperty("class_path"));
+		var path=tempItem.getProperty("class_path","");
+		if(path=="" || path==cn_class)
+		{
+			if(tempItem.getProperty("can_add")!="1")continue;
+			if(checkflag===true){
+				break;
+			}
+			var rItem=related_item.getItemByIndex(i);
+			if(rItem.getProperty("is_alias")=="0"){
+				IdentityGroup(rItem);
+			}else{
+				IdentitySingle(rItem);
+			}
+		}
+	}
+	return checkflag;
+}
+function IdentityGroup(IdtItem){
+	var Member=singleAML("Member","get","source_id",IdtItem.getProperty("id"));
+
+	if(Member.isError() != true){
+		var related_item=Member.getItemsByXPath("//Item/related_id/Item");
+		//console.log(IdtItem.getProperty("name"));
+		for(var i=0;i<related_item.getItemCount();i++){
+			var rItem=related_item.getItemByIndex(i);
+			if(rItem.getProperty("is_alias")=="0"){
+				IdentityGroup(rItem);
+			}else{
+				IdentitySingle(rItem);
+			}
+		}
+	}
+}
+function IdentitySingle(IdtItem){
+	if(IdtItem.getID() == userAlias){
+		checkflag=true;
+	}
+
+}
+
+//================END內部事件================
+
+//==================主程式===================
+
+if(check_CanAdd(CanAdd,userAlias)){ //確認可新增權限
+	if(checkProjectItem.isError()){
+		var doc ="<name>"+ item.getProperty("name")+"/"+item.getProperty("cn_item_no")+"</name>";
+		doc+="<scheduling_type>Forward</scheduling_type>";
+		doc+="<from_template>A33AAF9C4DBE405DB277FB0B873BB3EA</from_template>";
+
+        var itemResult = inn.applyMethod("bcs_NewPrjTemplate_Default", doc);	
+        if (itemResult.isError()){
+        	  alert( itemResult.getErrorString() );
+        	  return;
+		}else{
+			itemResult.setProperty("cn_document",item.getProperty("id"));
+			itemResult.setProperty("cn_class",item.getProperty("cn_classification"));
+			itemResult.setProperty("name",item.getProperty("name")+"/"+item.getProperty("cn_item_no"));
+			//itemResult.setProperty("owned_by_id",userAlias);  // edit by panda by 2016/11/25: don't copy user
+			itemResult=itemResult.apply("edit");
+			if(itemResult.isError())alert(itemResult.getErrorString());
+			
+			item.lockItem();
+			item.setProperty("cn_project",itemResult.getProperty("id"));
+			item.apply();
+			item.unlockItem();
+			top.aras.uiShowItem("Project",itemResult.getID());
+		}
+	}else{
+		top.aras.uiShowItem("Project",checkProjectItem.getID());
+	}
+}else{
+	alert("不可建立");
+}
+//==========================================
+

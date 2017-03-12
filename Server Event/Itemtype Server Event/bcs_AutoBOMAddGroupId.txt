@@ -1,0 +1,42 @@
+//Creator:Panda
+//Name:bcs_AutoBOMAddGroupId
+//Type:C#
+//Event: [Part] => Server Event => OnAfterAdd,OnAfterUpdate
+//Comments:v0.1 Developed By Panda @ 2016/10/20
+//目的:檢查Part的BOM列表中所有的Part，cn_group_id是否都與第一個Part相同
+//===============================================================
+//======公開程式碼不負責維護，只提供程式參考與學習===============
+
+
+Innovator inn = this.getInnovator();
+string item_id=this.getID();
+
+string[] relationBOM={"Part BOM","part all bom"};
+
+for(int index=0;index < 2;index++)
+{
+    Item PartBOM = inn.newItem(relationBOM[index], "get");
+    PartBOM.setProperty("source_id", item_id);
+    PartBOM = PartBOM.apply();
+    
+    if(!PartBOM.isEmpty()){
+        string first_group_id="";
+        for (int i = 0; i < PartBOM.getItemCount(); i++)
+        {
+            Item PartBOM_Temp = PartBOM.getItemByIndex(i);
+            if(i==0)
+            {
+                first_group_id=PartBOM_Temp.getProperty("cn_group_id");
+            }else{
+                if(first_group_id!=""){
+                    PartBOM_Temp.lockItem();
+                    PartBOM_Temp.setProperty("cn_group_id",first_group_id);
+                    PartBOM_Temp.setAction("update");
+                    PartBOM_Temp.apply();
+                    PartBOM_Temp.unlockItem();
+                }
+            }
+        }
+    }
+}
+return this;

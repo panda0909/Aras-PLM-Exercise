@@ -1,0 +1,19 @@
+//Creator:Panda
+//Name:bcs_Notify_Tech_addContent
+//Type:Javascript
+//Event: [iq_Notify_Technology] => Form Event => OnFormPopulated
+//Comments:v0.1 Developed By Panda @ 2016/10/06
+//目的:在表單開啟時，載入包含換行字串的內容
+//===============================================================
+//======公開程式碼不負責維護，只提供程式參考與學習===============
+
+var thisItem=document.thisItem;
+var test1=thisItem.getProperty("iq_content");
+
+if(test1 == "" || test1==null){
+    thisItem.setProperty("iq_content","A:目的\r\nB：適用範圍\r\nC：方法\r\nD：製成名稱\r\nE：實施日期");
+    parent.onRefresh();
+}
+/*
+document.forms.MainDataForm.iq_content.value="A：目的"+"\r\n"+"B：適用範圍"+"\r\n"+"C：方法"+"\r\n"+"D：製成名稱"+"\r\n"+"E：實施日期";
+*/

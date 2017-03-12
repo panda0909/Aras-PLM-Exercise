@@ -1,0 +1,54 @@
+//Creator:Panda
+//Name:bcs_iq_projectapply_ClassToFac
+//Type:JavaScript
+//Event:[form iq_project_apply]=> [classification] => Control Event => onChage
+//Comments:v0.1 Developed By Panda @ 2016/12/15
+//目的:當表單上classificatioin值被改變時，改變List控制項的值
+//===============================================================
+//======公開程式碼不負責維護，只提供程式參考與學習===============
+
+var item = document.thisItem;
+var inn= new Innovator;
+var classification=document.getElementsByClassName("classification");
+
+//classification[0].value=this.getAttribute('value');
+var iq_factory=item.getProperty("iq_factory");
+
+var iq_factory_list=inn.newItem("List","get");
+iq_factory_list.setProperty("name","iq_factory");
+iq_factory_list=iq_factory_list.apply();
+
+var iq_factory_value=inn.newItem("Value","get");
+iq_factory_value.setProperty("source_id",iq_factory_list.getID());
+iq_factory_value=iq_factory_value.apply();
+
+var label=classification[0].value;
+if(label!=""){
+    for(var i=0;i<iq_factory_value.getItemCount();i++)
+    {
+        var iq_item=iq_factory_value.getItemByIndex(i);
+        //alert(iq_item.getProperty("label"));
+        if(iq_item.getProperty("label")==label){
+            //alert(iq_item.getProperty("value"));
+            item.setProperty("iq_factory",iq_item.getProperty("value"));
+            var div_fac=document.getElementsByName("iq_factory")[0].getElementsByTagName('input');
+            for(var j=0;j<div_fac.length;j++){
+                console.log(div_fac[j].value)
+                div_fac[j].checked=false;
+                if(div_fac[j].value==iq_item.getProperty("value")){
+                    div_fac[j].checked=true;
+                }
+            }
+            
+           
+        }
+    }
+}else{
+    var div_fac=document.getElementsByName("iq_factory")[0].getElementsByTagName('input');
+            for(var j=0;j<div_fac.length;j++){
+                console.log(div_fac[j].value)
+                div_fac[j].checked=false;
+                
+            }
+    
+}

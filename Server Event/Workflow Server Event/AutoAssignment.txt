@@ -1,0 +1,75 @@
+//Creator:Panda
+//Name:bcs_AddAssignmentToActivity
+//Type:C#
+//Event: Workflow Event => onActivate
+//Comments:v0.1 Developed By Panda @Broadway 2016/10/11
+//目的:利用頁籤上的簽審人員名單，自動插入會簽成員
+//===============================================================
+//======公開程式碼不負責維護，只提供程式參考與學習===============
+
+//備註:程式上必須對簽審清單Relationship的名稱做規範，才能達到動態使用此method
+//     如 [Itemtype_name Identity]，如有不同需要另作更改。 41行
+
+Innovator inn = this.getInnovator();
+string actId = this.getID();
+
+
+//取出目前節點的workflow物件**************************
+Item wflItem = this.newItem("Workflow","get");
+wflItem.setAttribute("select","source_id,source_type");
+Item wflProc = wflItem.createRelatedItem("Workflow Process","get");
+wflProc.setAttribute("select","name");
+Item wflProcAct = wflProc.createRelationship("Workflow Process Activity","get");
+wflProcAct.setAttribute("select","related_id");
+wflProcAct.setProperty("related_id",actId);
+wflItem = wflItem.apply();
+//***************************************************
+
+//讀出舊的簽審人員***********************************
+Item old_Assignment = this.newItem("Activity Assignment","get");
+old_Assignment.setProperty("source_id",actId);
+old_Assignment=old_Assignment.apply();
+ArrayList old_Asgmt = new ArrayList();
+if(old_Assignment.isError()){
+    for(int i=0; i<old_Assignment.getItemCount();i++){
+        Item tmp=old_Assignment.getItemByIndex(i);
+        string old_id=tmp.getProperty("related_id");
+        if(old_id!="")old_Asgmt.Add(old_id);
+    }
+}
+//****************************************************
+
+//讀取目前的簽審人員清單******************************
+string contType = wflItem.getPropertyAttribute("source_type","keyed_name","");
+string AddAssignmentRelationship=contType+" Identity";
+
+Item contItem = this.newItem(contType,"get");
+contItem.setID(wflItem.getProperty("source_id","NON_EXISTING_ID"));
+contItem.setAttribute("select","item_number,state");
+Item rel = contItem.createRelationship(AddAssignmentRelationship,"get");
+contItem = contItem.apply();
+
+Item affItems = contItem.getItemsByXPath("Relationships/Item/related_id/Item");
+ArrayList idents = new ArrayList();
+string res="";
+  for (int i=0; i<affItems.getItemCount(); i++)
+  {
+    string identId = "";
+    Item itm = affItems.getItemByIndex(i);
+    identId = itm.getID();
+    
+    if (identId !="" && !idents.Contains(identId) && !old_Asgmt.Contains(identId))
+    {
+
+      idents.Add(identId);
+      
+      Item assignment = this.newItem("Activity Assignment","add");
+      assignment.setProperty("source_id", actId);
+      assignment.setProperty("related_id", identId);
+      assignment.setProperty("voting_weight", "100");
+      assignment.setProperty("is_required", "0");
+      assignment = assignment.apply();
+    }
+  }
+
+return this;

@@ -1,0 +1,107 @@
+/*
+//Creator:Panda
+//Name:bcs_NPR_Part_Repeal_UpState
+//Type:C#
+//Event: [NPR Workflow] => Server Event => onActive
+//Comments:v0.1 Developed By Panda @Broadway 2016/12/22
+//============================================================
+//目的:workflow 零組件,廢止料件state2狀態推播
+//零組件 N->S->Y  ,廢止料件N->S->X
+//===============================================================
+//======公開程式碼不負責維護，只提供程式參考與學習===============
+*/
+
+Innovator inn=this.getInnovator();
+
+string actId= this.getID();
+string form_id="";
+string activity_name="";
+
+string[] workflow_name={"Creator","EG","End"};
+string[] part_state2={"N","S","Y"};
+string[] repeal_state2={"N","S","X"};
+
+try{
+    
+Aras.Server.Security.Identity plmIdentity = Aras.Server.Security.Identity.GetByName("Aras PLM");
+Boolean PermissionWasSet = Aras.Server.Security.Permissions.GrantIdentity(plmIdentity);
+
+//取出目前節點的workflow物件*************************
+Item wflItem = this.newItem("Workflow","get");
+wflItem.setAttribute("select","source_id,source_type");
+Item wflProc = wflItem.createRelatedItem("Workflow Process","get");
+wflProc.setAttribute("select","name");
+Item wflProcAct = wflProc.createRelationship("Workflow Process Activity","get");
+wflProcAct.setAttribute("select","related_id");
+wflProcAct.setProperty("related_id",actId);
+wflItem = wflItem.apply();
+form_id=wflItem.getProperty("source_id");
+//***************************************************
+
+//取出流程節點名稱***********************************
+Item activity= inn.newItem("Activity","get");
+activity.setID(actId);
+activity=activity.apply();
+activity_name=activity.getProperty("name","");
+//***************************************************
+
+//取得該表單物件*************************************
+Item form_item=inn.newItem("NPR","get");
+form_item.setID(form_id);
+form_item=form_item.apply();
+//***************************************************
+
+
+string classification=form_item.getProperty("classification","");
+if (classification=="")return inn.newError("類別不可空值");
+
+if(classification=="申請")
+{
+    Item NPR_part = inn.newItem("NPR Part","get");
+    NPR_part.setProperty("source_id",form_id);
+    NPR_part=NPR_part.apply();
+    if(NPR_part.getItemCount()<=0)return inn.newError("零組件頁籤必須包含至少一個物件");
+    
+   for(int i=0;i<NPR_part.getItemCount();i++){
+       Item part = NPR_part.getItemByIndex(i).getItemsByXPath("related_id/Item");
+       for(int j=0;j<3;j++){
+           if(activity_name==workflow_name[j]){
+               if (part.getLockStatus()!=0)return inn.newError("請將頁籤內所有物件解鎖");
+            //   return inn.newError(part.getLockStatus().ToString());
+               part.lockItem();
+               part.setProperty("iq_state",part_state2[j]);
+               part.setAction("update");
+               part=part.apply();
+              part.unlockItem();
+           }
+       }
+   }
+}else
+if(classification=="廢止")
+{
+    Item NPR_part = inn.newItem("NPR Repeal","get");
+    NPR_part.setProperty("source_id",form_id);
+    NPR_part=NPR_part.apply();
+    if(NPR_part.getItemCount()<=0)return inn.newError("廢止料件頁籤必須包含至少一個物件");
+    
+   for(int i=0;i<NPR_part.getItemCount();i++){
+       Item part = NPR_part.getItemByIndex(i).getItemsByXPath("related_id/Item");
+       for(int j=0;j<3;j++){
+           if(activity_name==workflow_name[j]){
+               if (part.getLockStatus()!=0)return inn.newError("請將頁籤內所有物件解鎖");
+            //   return inn.newError(part.getLockStatus().ToString());
+               part.lockItem();
+               part.setProperty("iq_state",repeal_state2[j]);
+               part.setAction("update");
+               part=part.apply();
+               part.unlockItem();
+           }
+       }
+   }
+}
+
+if (PermissionWasSet) Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);
+return this;
+} catch (Exception ex) {
+	throw new Exception(ex.Message);
+}

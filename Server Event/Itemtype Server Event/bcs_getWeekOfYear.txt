@@ -1,0 +1,26 @@
+//Creator:Panda
+//Name:bcs_getWeekOfYear
+//Type:C#
+//Event: [] => Server Event => OnBeforeAdd
+//Comments:v0.1 Developed By Panda @Broadway 2016/10/05
+//目的:在onBeforeAdd時，自動插入第幾週期
+//===============================================================
+//======公開程式碼不負責維護，只提供程式參考與學習===============
+
+
+Innovator inn = this.getInnovator();
+
+// return inn.newError(this.getID());
+// return inn.newError(this.getAction());
+DateTime now=DateTime.Now;
+
+Calendar cal=new GregorianCalendar();
+DayOfWeek firstDay = DayOfWeek.Sunday;
+CalendarWeekRule rule;
+
+rule = CalendarWeekRule.FirstDay;
+int week=cal.GetWeekOfYear(now, rule, firstDay);
+
+this.setProperty("year",week.ToString());
+return this;
+

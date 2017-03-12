@@ -1,0 +1,115 @@
+//Creator:Panda
+//Name:bcs_ChkReviewClassification
+//Type:C#
+//Event: [Express DCO] => Server Event => OnAfterAdd,OnAfterUpdate
+//Comments:v0.1 Developed By Panda @Broadway 2016/10/05
+//         v0.2 Developed By Panda @Broadway 2016/10/21
+//              修改change物件只判斷AffectItem
+
+//目的:檢查DCO的變更項目是否重複
+//===============================================================
+//======公開程式碼不負責維護，只提供程式參考與學習===============
+
+
+Innovator inn = this.getInnovator();
+// return inn.newError(this.getID());
+Item DCO_Affected_Item = inn.newItem("Express DCO Affected Item", "get");
+DCO_Affected_Item.setAttribute("select", "source_id,related_id");
+DCO_Affected_Item.setProperty("source_id", this.getID());
+DCO_Affected_Item = DCO_Affected_Item.apply();
+
+string res="";
+string firstItemType="";
+string firstItemClassification="";
+
+for(int i=0;i<DCO_Affected_Item.getItemCount();i++){
+    Item temp=DCO_Affected_Item.getItemByIndex(i);
+    temp=temp.getItemsByXPath("related_id/Item");
+    if(temp.getProperty("action")=="Add")
+    {
+        string new_item_id=temp.getProperty("new_item_id");
+        Item ChCtrI = inn.newItem("Change Controlled Item","get");
+        ChCtrI.setAttribute("select","id,classification,itemtype,item_number");
+        ChCtrI.setProperty("id",new_item_id);
+        ChCtrI=ChCtrI.apply();
+        string itm_classfication=ChCtrI.getProperty("classification");
+        string itm_itemtype=ChCtrI.getPropertyAttribute("id","type");
+        string itm_item_number=ChCtrI.getProperty("item_number");
+        
+        if(i==0)
+        {
+            firstItemClassification=itm_classfication;
+            firstItemType=itm_itemtype;
+        }else
+        {
+            if(itm_itemtype==firstItemType && itm_itemtype=="Document")
+            {
+                if(itm_classfication!=firstItemClassification)
+                res+="Error:"+itm_item_number+" Classification is different from other."+"<br/>";
+            }
+            else if(itm_itemtype!=firstItemType)
+            {
+                res+="Error:"+itm_item_number+" ItemType is different from other."+"<br/>";
+            }
+        }
+    }
+    else if(temp.getProperty("action")=="Change")
+    {
+        //2016-10-21 update: only affect item
+        // string[] action_itm={"new_item_id","affected_id"};
+        string[] action_itm={"affected_id"};
+        for(int j=0;j<action_itm.Count();j++){
+            string new_item_id=temp.getProperty(action_itm[j]);
+            Item ChCtrI = inn.newItem("Change Controlled Item","get");
+            ChCtrI.setProperty("id",new_item_id);
+            ChCtrI=ChCtrI.apply();
+            string itm_classfication=ChCtrI.getProperty("classification");
+            string itm_itemtype=ChCtrI.getPropertyAttribute("id","type");
+            string itm_item_number=ChCtrI.getProperty("item_number");
+            if(i==0)
+            {
+                firstItemClassification=itm_classfication;
+                firstItemType=itm_itemtype;
+            }else
+            {
+                if(itm_itemtype==firstItemType && itm_itemtype=="Document")
+                {
+                    if(itm_classfication!=firstItemClassification)
+                    res+="Error:"+itm_item_number+" Classification is different from other."+"<br/>";
+                }else if(itm_itemtype!=firstItemType)
+                {
+                    res+="Error:"+itm_item_number+" ItemType is different from other."+"<br/>";
+                }
+            }
+        }
+    }
+    else if(temp.getProperty("action")=="Delete")
+    {
+        string affected_id=temp.getProperty("affected_id");
+        Item ChCtrI = inn.newItem("Change Controlled Item","get");
+        ChCtrI.setProperty("id",affected_id);
+        ChCtrI=ChCtrI.apply();
+        string itm_classfication=ChCtrI.getProperty("classification");
+        string itm_itemtype=ChCtrI.getPropertyAttribute("id","type");
+        string itm_item_number=ChCtrI.getProperty("item_number");
+        if(i==0)
+        {
+            firstItemClassification=itm_classfication;
+            firstItemType=itm_itemtype;
+        }else
+        {
+            if(itm_itemtype==firstItemType && itm_itemtype=="Document")
+            {
+                if(itm_classfication!=firstItemClassification)
+                    res+="Error:"+itm_item_number+" Classification is different from other."+"<br/>";
+            }else if(itm_itemtype!=firstItemType)
+            {
+                res+="Error:"+itm_item_number+" ItemType is different from other."+"<br/>";
+            }
+        }
+    }
+}
+
+if(res!="")return inn.newError(res);
+
+return this;

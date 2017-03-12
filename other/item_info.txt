@@ -1,0 +1,9 @@
+<span id="ITEM_INFO_INTERNAL_SPAN"/>
+<script>
+  populate_ITEM_INFO_INTERNAL_SPAN = function()
+  {
+    document.getElementById("ITEM_INFO_INTERNAL_SPAN").innerHTML = top.aras.uiDrawItemInfoTable(document.itemType);
+    top.aras.uiPopulateInfoTableWithItem(document.item, document);
+  }
+  window.addEventListener("load", populate_ITEM_INFO_INTERNAL_SPAN);
+</script>

@@ -1,0 +1,49 @@
+'Creator:Panda
+'Name:bcs_create_workflow
+'Type:VB
+'Event: [ECR] => Lifecycle server method =>pre
+'Comments:v0.1 Developed By Panda @Broadway 2016/12/14
+'目的:在生命週期的流程上，用程式啟動workflow
+'===============================================================
+'======公開程式碼不負責維護，只提供程式參考與學習===============
+
+'System.Diagnostics.Debugger.Break()
+'-------------------------------------------------------
+
+
+'人部程式取得controlledItem,需要權限 -----------------------------------------------------------
+Dim plmIdentity As Aras.Server.Security.Identity 
+Dim PermissionWasSet As Boolean 
+plmIdentity  = Aras.Server.Security.Identity.GetByName("Aras PLM")
+PermissionWasSet  = Aras.Server.Security.Permissions.GrantIdentity(plmIdentity)
+'-----------------------------------------------------------------------------------------------------------
+
+Dim WF As Item = Me.getInnovator().getItemByKeyedName("Workflow Map", "cn_ECR workflow map")
+
+	If WF.isError() = True Then 
+		Throw New Exception("workflow error")
+	End If
+
+	Dim WF_Process As Item = Me.instantiateWorkflow(WF.getID())
+	
+	If WF_Process.isError() Then
+		Throw New Exception("workflow process error")
+	End If
+
+	WF_Process=WF_Process.apply("startWorkflow")
+        if WF_Process.isError() = false Then
+	       
+        else
+                return inn.newError("無法啟動工作流程")
+        end if
+      
+        
+        
+
+If (PermissionWasSet=True) Then Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity)'權限
+return Me
+Catch ex As Exception
+	Throw New Exception(ex.Message)
+End Try
+
+Return Me

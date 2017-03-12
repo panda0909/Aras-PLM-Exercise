@@ -1,0 +1,11 @@
+//Creator:Panda
+//Name:ClickListValueToText
+//Type:JavaScript
+//Event: Control Event => onClick 
+//Comments:v0.1 Developed By Panda  2016/11/16
+//目的:當物件被Click時，取得表單上List物件的值
+//===============================================================
+//======公開程式碼不負責維護，只提供程式參考與學習===============
+
+var text2=document.getElementsByClassName("test2");
+text2[0].value=this.getAttribute('value');

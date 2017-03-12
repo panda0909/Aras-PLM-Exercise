@@ -1,0 +1,21 @@
+//Creator:Panda
+//Name:bcs_ChkAutoNumber
+//Type:JavaScript
+//Event:[form iq_part]=>  form Event => onFormPopulated
+//Comments:v0.1 Developed By Panda @ 2016/12/15
+//目的:在表單開啟時，確認物件的狀態是否需要將控制項關閉
+//===============================================================
+//======公開程式碼不負責維護，只提供程式參考與學習===============
+//var inn = this.getInnovator();
+var thisItem = document.thisItem;
+
+//--------------------------------------------
+if(thisItem.getProperty("itemnumber_flag","")=="1"){
+    document.getElementsByClassName("item_number")[0].disabled='disabled';
+     var div_fac=document.getElementsByName("iq_temprary_preamble")[0].getElementsByTagName('input');
+     
+            for(var j=0;j<div_fac.length;j++){
+                div_fac[j].disabled='disabled';
+                
+            }
+}

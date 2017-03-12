@@ -1,0 +1,153 @@
+﻿// Function: 判斷機種內主料及替代料未發行無法推關
+// Name: bcs_chkaffectItemreleased
+// Created by Robin 2016/11/28
+// Update by Panda 2016/12/06
+// Update by Panda 2016/12/12 修改只判斷A版
+// Type: C#
+// Event: WorkFlow Map => cn_ECN workflow => Server Event => On Vote
+
+
+Innovator inn=this.getInnovator();
+
+string qry=null;
+//return inn.newError(this.getID());
+Item wflItem = this.newItem("Workflow","get");
+wflItem.setAttribute("select","source_id,source_type");
+Item wflProc = wflItem.createRelatedItem("Workflow Process","get");
+wflProc.setAttribute("select","name");
+Item wflProcAct = wflProc.createRelationship("Workflow Process Activity","get");
+wflProcAct.setAttribute("select","related_id");
+wflProcAct.setProperty("related_id",this.getID());
+wflItem = wflItem.apply();
+ 
+qry+="select e.item_number,p.ITEM_NUMBER as cn_new_part,p.is_released as p_is_released ,p.Major_rev as p_major_rev";
+qry+=",pb_p.item_number as cn_new_part_of_bom, pb_p.is_released as pb_is_released ,pb_p.MAJOR_REV as pb_major_rev ";
+qry+=",sp.ITEM_NUMBER as sub_part,sp.is_released as sp_is_released ,sp.MAJOR_REV as sp_major_rev ";
+qry+="from innovator.[ECN] as e ";
+qry+="left join innovator.[ECN_AFFECTED_ITEM] as efi on efi.SOURCE_ID =e.id ";
+qry+="left join innovator.[AFFECTED_ITEM] as af on efi.RELATED_ID = af.id ";
+qry+="left join innovator.[PART] as p on p.id =af.NEW_ITEM_ID ";
+qry+="left join innovator.[PART_BOM] as pb on pb.SOURCE_ID=p.id ";
+qry+="left join innovator.[PART] as pb_p on pb_p.id=pb.RELATED_ID ";
+qry+="left join innovator.[BOM_SUBSTITUTE] as bs on bs.SOURCE_ID=pb.id ";
+qry+="left join innovator.[PART] as sp on sp.id=bs.RELATED_ID ";
+qry+="where e.id='"+wflItem.getProperty("source_id")+"' ";
+
+
+
+Item itm=inn.applySQL(qry);
+
+List<string> ary=new List<string>();
+List<string> state=new List<string>();
+List<string> chkrp=new List<string>();
+List<string> major_rev=new List<string>();
+string no_released="";
+string affect_items="";
+
+//Updated by Panda on 2016/12/12 更新控制A版
+//先把所有機種A版存在陣列
+//-----主料與替代料都未發行，並且都是A版
+//--------------|
+//--------------﹂主料與替代料不是機種
+//--------------﹂主料不是機種、替代料是機種
+//--------------﹂主料是機種、替代料不是機種
+//-----主料未發行，並且是A版
+//-----------﹂主料不是機種
+//-----替代料未發行，並且是A版
+//-----------﹂替代料不是機種
+
+if(itm.getItemCount()>0){
+	for(int i=0;i<itm.getItemCount();i++){
+	        // location=0
+		state.Add(itm.getItemByIndex(i).getProperty("p_is_released",""));
+		ary.Add(itm.getItemByIndex(i).getProperty("cn_new_part",""));
+		major_rev.Add(itm.getItemByIndex(i).getProperty("p_major_rev",""));
+		affect_items+=itm.getItemByIndex(i).getProperty("cn_new_part","")+",";
+		// location=1
+		state.Add(itm.getItemByIndex(i).getProperty("pb_is_released",""));
+		ary.Add(itm.getItemByIndex(i).getProperty("cn_new_part_of_bom",""));
+		major_rev.Add(itm.getItemByIndex(i).getProperty("pb_major_rev",""));
+		// location=2
+		state.Add(itm.getItemByIndex(i).getProperty("sp_is_released",""));
+		ary.Add(itm.getItemByIndex(i).getProperty("sub_part",""));
+		major_rev.Add(itm.getItemByIndex(i).getProperty("sp_major_rev",""));
+	}
+	
+	//string stick=null;  //updated by panda 2016/12/09 不可使用NULL
+	string stick="";
+	
+	if(ary.Count != 0  ) {
+		for(int i=0;i<itm.getItemCount();i++){
+				if(state[i*3+1].ToString() !="1" && state[i*3+2].ToString()!="1" && state[i*3+1].ToString()!="" && state[i*3+2].ToString()!=""){
+					
+					if (no_released.IndexOf(ary[i*3+1]+ary[ i*3+2 ]) <0 && affect_items.IndexOf(ary[i*3+1])<0 && affect_items.IndexOf(ary[i*3+2])<0)
+					{
+						if(major_rev[i*3+1].ToString()=="A" && major_rev[i*3+2].ToString()=="A")
+						{
+							stick +=(ary[i*3])+" 機種內有 ";
+							stick+="主料 "+(ary[i*3+1]);
+							stick+=" 及替代料 "+(ary[ i*3+2 ]);
+							stick+=" 未發行<br>";
+							no_released+=ary[i*3+1]+ary[ i*3+2 ]+",";
+						}
+					}
+				
+					else if (no_released.IndexOf(ary[i*3+1]+ary[ i*3+2 ]) <0 && affect_items.IndexOf(ary[i*3+1])<0 && affect_items.IndexOf(ary[i*3+2])>=0)
+					{
+						if(major_rev[i*3+1].ToString()=="A" )
+						{
+							stick +=(ary[i*3])+" 機種內有 ";
+							stick+="主料 "+(ary[i*3+1]);
+							stick+=" 未發行<br>";
+							no_released+=ary[i*3+1]+",";
+						}
+					}
+					else if (no_released.IndexOf(ary[i*3+1]+ary[ i*3+2 ]) <0 && affect_items.IndexOf(ary[i*3+1])>=0 && affect_items.IndexOf(ary[i*3+2])<0)
+					{
+						if(major_rev[i*3+2].ToString()=="A")
+						{
+							stick +=(ary[i*3])+" 機種內有 ";
+							stick+="主料 "+(ary[i*3+1]);
+							stick+=" 的替代料 "+(ary[ i*3+2 ]);
+							stick+=" 未發行<br>";
+							no_released+=ary[i*3+1]+ary[ i*3+2 ]+",";
+						}
+					}
+					
+				}
+				else if(state[i*3+1].ToString() !="1" && state[i*3+1].ToString() !="" ){
+					if(major_rev[i*3+1].ToString()=="A" )
+					{
+						if (no_released.IndexOf(ary[i*3+1]) <0 && affect_items.IndexOf(ary[i*3+1])<0)
+						{
+							stick +=(ary[i*3])+" 機種內有 ";
+							stick+="主料 "+(ary[i*3+1]);
+							stick+=" 未發行<br>";
+							no_released+=ary[i*3+1]+",";
+						}
+					}
+				}
+				else if(state[i*3+2].ToString() !="1" && state[i*3+2].ToString() !=""  ){
+					if( major_rev[i*3+2].ToString()=="A")
+					{
+						if (no_released.IndexOf(ary[i*3+1]+ary[ i*3+2 ]) <0 && affect_items.IndexOf(ary[i*3+2])<0)
+						{
+							stick +=(ary[i*3])+" 機種內有 ";
+							stick+="主料 "+(ary[i*3+1]);
+							stick+=" 的替代料 "+(ary[ i*3+2 ]);
+							stick+=" 未發行<br>";
+							no_released+=ary[i*3+1]+ary[ i*3+2 ]+",";
+						}
+					}
+				}							
+		}
+	}
+	if(stick!=""){
+	return inn.newError(stick);
+	}
+	
+}else{
+	return  this;
+
+}
+return this;
