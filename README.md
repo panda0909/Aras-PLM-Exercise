@@ -18,9 +18,9 @@
 
 >Workflow Server Event
 
->>[1.利用頁籤上的簽審人員名單，自動插入會簽成員](/Server%20Event/Workflow Server%20Event/AutoAssignment.txt) #assignment
+>>[1.利用頁籤上的簽審人員名單，自動插入會簽成員](/Server%20Event/Workflow%20Server%20Event/AutoAssignment.txt) #assignment
 
->>[2.workflow 零組件,廢止料件state2狀態推播](/Server%20Event/Workflow Server%20Event/bcs_NPR_Part_Repeal_UpState.txt) #relationship
+>>[2.workflow 零組件,廢止料件state2狀態推播](/Server%20Event/Workflow%20Server%20Event/bcs_NPR_Part_Repeal_UpState.txt) #relationship
 
 >>[3.利用程式推動工作流程節點](/Server%20Event/Workflow%20Server%20Event/bcs_chkPartOnlyOneForECR_UpWF.txt) #EvaluateActivity
 
@@ -34,7 +34,7 @@
 ##Client Event
 >Action
 
->>[1.取得領號規則，並且依據Itemtype欄位的iq_temprary_preamble值選擇領取P0 or H0之領號規則，並存入表單item_number欄位](/Client Event/Action/bcs_AutoNumberingAction.js) #item_number #sequence
+>>[1.取得領號規則，並且依據Itemtype欄位的iq_temprary_preamble值選擇領取P0 or H0之領號規則，並存入表單item_number欄位](/Client%20Event/Action/bcs_AutoNumberingAction.js) #item_number #sequence
 
 >Control Event
 >>[1.當物件被Click時，取得表單上List物件的值](/Client%20Event/Control%20Event/bcs_ClickListValueToText.txt) #List #click
