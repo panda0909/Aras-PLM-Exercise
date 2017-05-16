@@ -12,7 +12,7 @@
 >Itemtype Server Event
 >>[1.檢查Part的BOM列表中所有的Part，cn_group_id是否都與第一個Part相同](/Server%20Event/Itemtype%20Server%20Event/bcs_AutoBOMAddGroupId.txt) #relationship #update
 
->>[2.檢查DCO的變更項目是否重複](/Server Event/Itemtype%20Server%20Event/bcs_ChkReviewClassification.txt) #polyitem
+>>[2.檢查DCO的變更項目是否重複](/Server%20Event/Itemtype%20Server%20Event/bcs_ChkReviewClassification.txt) #polyitem
 
 >>[3.在onBeforeAdd時，自動插入第幾週期](/Server%20Event/Itemtype%20Server%20Event/bcs_getWeekOfYear.txt) #weektime
 
