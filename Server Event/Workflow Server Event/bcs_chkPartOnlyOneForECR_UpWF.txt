@@ -8,8 +8,7 @@
 //======公開程式碼不負責維護，只提供程式參考與學習===============
 'System.Diagnostics.Debugger.Break()
 
-Dim CbwGeneric As  bwInnovatorCore.CInnovator.bwGeneric = New bwInnovatorCore.CInnovator.bwGeneric
-CbwGeneric.bwIOMInnovator = Me.getInnovator()
+
 
 Dim inn as Innovator = Me.getInnovator()
 Dim query as String =""
