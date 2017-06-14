@@ -35,9 +35,7 @@ If Not qItem Is Nothing  Then
 		Dim itemAct as Item = qItem.getItemByIndex(i)
 		Dim a_id as String=itemAct.getProperty("id","")
 		Dim aa_id as String =itemAct.getProperty("aa_id","")
-'		if CbwGeneric.PromoteWorkflowNodeByNextPathName(a_id,"提出審核",aa_id,"0","提出審核")=false then
-'		     return inn.newError("推關失敗，請工程師驗證")
-'		end if
+
 		if itemAct.getProperty("wpp_name","")="提出審核" then		        
 			
 			Dim applyActAML as string ="<AML>"
