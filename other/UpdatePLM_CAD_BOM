@@ -1,0 +1,171 @@
+private Boolean UpdatePLM_CAD_BOM(string item_id)
+{
+
+  XmlNodeList LoSection2100;
+  XmlNode LoItemHead_SizeRole;
+  XmlNodeList LoSectionBOM;
+  XmlNode LoAdminSettingBOM;
+  XmlNode LoAdminSettingLineStyle;
+  int key_number = 0;
+  string cn_size = "";
+  List<string> bom_title = new List<string>();
+  List<int> bom_title_sort = new List<int>();
+  try
+  {
+      if (item_id == "") return false;
+
+     ClearRelationShip("CAD Structure", item_id);
+
+      LoSection2100 = CoRoot.SelectNodes("section[@class='2100']/item[@type='2100']");
+      LoSectionBOM = CoRoot.SelectNodes("section[@class='NanYaBom']/item[ @cad_object_name='DBText' and @type='2100']");
+      LoAdminSettingLineStyle= CoRoot.SelectSingleNode("section[@class='NanYaBom']/item[ @cad_object_name='Line' and @has_style='NanYaBom-StyleAndSize']");
+      if (LoAdminSettingLineStyle == null)
+      {
+          //MessageBox.Show("未定義組立BOMStyle");
+          return true;
+      }
+      string style = CoCommon.GetXMLAttribute(LoAdminSettingLineStyle,"style","");
+      LoAdminSettingBOM = AttrSetting.SelectSingleNode("sections/section[@name='BOM_Maintain']/section[@type='Detail' and @style='"+ style + "' ]");
+      Item itmCAD = CasInnovator.newItem("CAD", "get");
+      itmCAD.setProperty("id", item_id);
+      itmCAD = itmCAD.apply();
+
+      if (LoSectionBOM != null)
+      {
+          for (int k = 0; k < LoSectionBOM.Count; k++)
+          {
+              XmlNode bomTemp = LoSectionBOM.Item(k);
+              if (CoCommon.GetXMLAttribute(bomTemp, "key_number", "") == "")
+              {
+                  bom_title.Add(CoCommon.GetXMLAttribute(bomTemp, "label", "").Trim());
+                  bom_title_sort.Add(k);
+              }
+          }
+      }
+      if (LoSection2100.Count > 0)
+      {
+          sortArray[] LoSection2100Array = new sortArray[LoSection2100.Count];
+          //-------------收集圖面上組立BOM資訊-----------------
+          for (int i = 0; i < LoSection2100.Count; i++)
+          {
+              LoItemHead_SizeRole = LoSection2100.Item(i);
+
+              cn_size = CoCommon.GetXMLAttribute(LoItemHead_SizeRole, "label", "");
+              key_number = Int16.Parse(CoCommon.GetXMLAttribute(LoItemHead_SizeRole, "key_number", ""));
+              sortArray tmpArray = new sortArray(key_number, cn_size);
+              LoSection2100Array[i] = tmpArray;
+          }
+          Array.Sort(LoSection2100Array);
+          Item cad_structure = null;
+          if (LoAdminSettingBOM != null)
+          {
+              if(CoCommon.GetXMLAttribute(LoAdminSettingBOM, "plm_action", "") == "bom")
+              {
+                  XmlNodeList BOMSettingList = LoAdminSettingBOM.SelectNodes("item[@type='Column']");
+                  bool related_id_flag = false;
+                  for (int i = 0; i < LoSection2100Array.Count(); i++)
+                  {
+                      sortArray obj = LoSection2100Array[i];
+                      int num = obj.GetKeyNumber() - 2100;
+                      int ModNum = num % bom_title.Count();
+                      if (ModNum == 0) ModNum = bom_title.Count();
+                      string TitleByNum = bom_title[ModNum - 1].Replace(" ", "").Replace("　", "");
+                      string subItem_id = "";
+
+                      if ((ModNum - 1) == 0)
+                      {
+                          cad_structure = CasInnovator.newItem("CAD Structure", "add");
+                          cad_structure.setProperty("source_id", itmCAD.getID());
+                          related_id_flag = false;
+                      }
+
+                      for (int j = 0; j < BOMSettingList.Count; j++)
+                      {
+                          XmlNode bomTemp = BOMSettingList.Item(j);
+                          if (CoCommon.GetXMLAttribute(bomTemp, "name", "") == TitleByNum)
+                          {
+                              string plm_field = CoCommon.GetXMLAttribute(bomTemp, "plm_field", "");
+                              string plm_itemtype = CoCommon.GetXMLAttribute(bomTemp, "plm_itemtype", "");
+                              string plm_key = CoCommon.GetXMLAttribute(bomTemp, "plm_key", "");
+
+                              if (plm_field != "" && plm_itemtype != "" && plm_key != "")
+                              {
+                                  Item subItem = CasInnovator.newItem("CAD", "get");
+                                  subItem.setProperty("item_number", obj.GetLabel());
+                                  subItem = subItem.apply();
+                                  if (subItem.isError() == false)
+                                  {
+                                      subItem_id = subItem.getID();
+                                      cad_structure.setProperty(plm_field, subItem_id);
+                                      related_id_flag = true;
+                                  }
+                                  else
+                                  {
+
+                                  }
+                              }
+                              else if (plm_field != "" && obj.GetLabel() != "")
+                              {
+                                  cad_structure.setProperty(plm_field, obj.GetLabel());
+                              }
+                          }
+                      }
+                      bool IsApply = false;
+                      if ((i + 1) < LoSection2100Array.Count())
+                      {
+                          sortArray obj2 = LoSection2100Array[i + 1];
+                          int num2 = obj2.GetKeyNumber() - 2100;
+                          int ModNum2 = num2 % bom_title.Count();
+                          if ((ModNum2 - 1) == 0) IsApply = true;
+                      }else
+                      {
+                          IsApply = true;
+                      }
+
+                      if (cad_structure != null && IsApply==true && related_id_flag == true)
+                      {
+                          cad_structure = cad_structure.apply();
+                          if (cad_structure.isError() == true)
+                          {
+                              //MessageBox.Show("子階工程圖關聯失敗" + cad_structure.getErrorString());
+                          }
+                      }
+                  }
+              }
+              else if(CoCommon.GetXMLAttribute(LoAdminSettingBOM, "plm_action", "") == "maintain") //plm_action='maintain'
+              {
+                  XmlNodeList BOMSettingList = LoAdminSettingBOM.SelectNodes("item[@type='Column']");
+                  bool related_id_flag = false;
+                  for (int i = 0; i < LoSection2100Array.Count(); i++)
+                  {
+                      sortArray obj = LoSection2100Array[i];
+                      int num = obj.GetKeyNumber() - 2100;
+                      int ModNum = num % bom_title.Count();
+                      if (ModNum == 0) ModNum = bom_title.Count();
+                      string TitleByNum = bom_title[ModNum - 1].Replace(" ", "").Replace("　", "");
+                      string subItem_id = "";
+
+                      for (int j = 0; j < BOMSettingList.Count; j++)
+                      {
+                          XmlNode bomTemp = BOMSettingList.Item(j);
+                          if (CoCommon.GetXMLAttribute(bomTemp, "name", "") == TitleByNum)
+                          {
+                              string plm_field = CoCommon.GetXMLAttribute(bomTemp, "plm_field", "");
+                              itmCAD.setAction("edit");
+                              itmCAD.setProperty(plm_field,obj.GetLabel());
+                              itmCAD.apply();
+                          }
+                      }
+                  }
+              }
+          }                  
+      }
+
+      return true;
+  }
+  catch (System.Exception ex)
+  {
+      CstrErrorMessage = ex.ToString();
+      return false;
+  }
+}
