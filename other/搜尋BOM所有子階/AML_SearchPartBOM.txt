@@ -1,0 +1,7 @@
+<AML>
+	<Item type='Part' select='item_number,cn_tag' action='GetItemRepeatConfig' id='ED93E6877FEC49F2BF5F8C750A0B6E71'>
+		<Relationships>
+			<Item type='Part BOM' select='related_id,quantity' repeatProp='related_id' repeatTimes='10'/>
+		</Relationships>
+	</Item>
+</AML>
