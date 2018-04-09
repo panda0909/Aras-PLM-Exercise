@@ -1,7 +1,7 @@
 /*取得所有的Aras BOM*/
 var GetPartBOMByAll=function(part_id)
 {
-    var inn = NanyaJSAras.Innovator;
+    var inn = new Innovator();
     try
     {
         var aml = "<AML><Item type='Part' select='item_number,cn_tag' action='GetItemRepeatConfig' id='"+part_id+"'><Relationships><Item type='Part BOM' select='related_id,quantity' repeatProp='related_id' repeatTimes='10'/></Relationships></Item></AML>";
