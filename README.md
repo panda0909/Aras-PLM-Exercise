@@ -16,6 +16,9 @@
 
 >>[3.在onBeforeAdd時，自動插入第幾週期](/Server%20Event/Itemtype%20Server%20Event/bcs_getWeekOfYear.txt) #weektime
 
+>>[3.在onAfterGet時，改變搜尋結果欄位顏色](/Server%20Event/Itemtype%20Server%20Event/onAfterGet_ChangeColor.cs) #color
+
+
 >Workflow Server Event
 
 >>[1.利用頁籤上的簽審人員名單，自動插入會簽成員](/Server%20Event/Workflow%20Server%20Event/AutoAssignment.txt) #assignment
