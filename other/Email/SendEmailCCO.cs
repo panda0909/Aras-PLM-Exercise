@@ -49,8 +49,7 @@ message.Body = body;
 message.IsBodyHtml = true;
  
 for ( int i = 0; i < attachments.Length; i++){
-    System.Net.Mail.Attachment attachment = new
-	System.Net.Mail.Attachment(attachments[i]);
+    System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(attachments[i]);
     System.Net.Mime.ContentDisposition disp = attachment.ContentDisposition;
     disp.CreationDate = System.IO.File.GetCreationTime(attachments[i]);
     disp.ModificationDate = System.IO.File.GetLastWriteTime(attachments[i]);
@@ -60,9 +59,7 @@ for ( int i = 0; i < attachments.Length; i++){
 }
 //System.Diagnostics.Debugger.Break();
 try{
-System.Net.Mail.SmtpClient client = new
-System.Net.Mail.SmtpClient(smtpSrv);
- 
+    System.Net.Mail.SmtpClient client = new System.Net.Mail.SmtpClient(smtpSrv);
 	client.Send(message);
 } catch (Exception e){
     message.Attachments.Dispose();
