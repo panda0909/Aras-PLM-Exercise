@@ -7,6 +7,7 @@
 >大部分是以練習API為主的範例。
 
 >若有程式上可精進的部分，歡迎建議與討論。
+>[Youtube分享](https://www.youtube.com/user/40025146)
 
 ##Server Event
 >Itemtype Server Event
