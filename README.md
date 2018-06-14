@@ -60,3 +60,5 @@
 >>[2.還原資料庫後帳號問題](/other/還原資料庫後帳號問題.txt) #sql
 
 >>[3.搜尋BOM所有子階](/other/搜尋BOM所有子階) #bom
+
+>>[4.搜尋視窗預設欄位SearchDialog](/Client%20Event/Relationship%20Event/filterSearchDialog.js)  #onSearchDialog
