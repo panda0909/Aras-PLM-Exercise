@@ -1,9 +1,9 @@
-1.¦bACWDialog.html ªº103¦æ·s¼Wµ{¦¡½X
+1.ä¿®æ”¹ACWDialog.html 103è¡Œç¨‹å¼ç¢¼
 setTimeout(function() {
 	ACWArguments.dialog.dialogNode.removeAttribute("preventclose");
 	ACWArguments.dialog.close(returnValue);
 }, 0);
 
-2.­×§ïMethod "runStartPage"
+2.ä¿®æ”¹ Method "runStartPage"
 
-3.DEMO https://youtu.be/gDfQKaKR9U8
+3.DEMOå½±ç‰‡ https://youtu.be/gDfQKaKR9U8
