@@ -5,3 +5,5 @@ setTimeout(function() {
 }, 0);
 
 2.­×§ïMethod "runStartPage"
+
+3.DEMO https://youtu.be/gDfQKaKR9U8
