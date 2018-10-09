@@ -1,4 +1,4 @@
-1.修改ACWDialog.html 103行程式碼
+1.修改CodeTree  /Client/Solutions/Project/scripts/ActivityCompletionWorksheet/ACWDialog.html 103行程式碼
 setTimeout(function() {
 	ACWArguments.dialog.dialogNode.removeAttribute("preventclose");
 	ACWArguments.dialog.close(returnValue);
