@@ -1,0 +1,7 @@
+1.在ACWDialog.html 的103行新增程式碼
+setTimeout(function() {
+	ACWArguments.dialog.dialogNode.removeAttribute("preventclose");
+	ACWArguments.dialog.close(returnValue);
+}, 0);
+
+2.修改Method "runStartPage"
