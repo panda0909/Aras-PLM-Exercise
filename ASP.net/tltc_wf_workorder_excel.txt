@@ -1,0 +1,142 @@
+//Creator:Panda
+//Name:tltc_wf_workorder_excel
+//Type:C#
+//Event:[Work Order Application Form] Workflow Event => onActivate
+//Comments:v0.1 Developed By Panda @Broadway 2017/11/09
+//============================================================
+//目的:產生excel並存入vault，回填表單單頭
+//必須有ClosedXML.dll,DocumentFormat.OpenXml.dll
+Item item=main();
+if (PermissionWasSet) Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);
+if(item.isError()==true){
+    return inn.newError(item.getErrorString());
+}else if(ErrorMessage!=""){
+    return inn.newError(ErrorMessage);
+}
+return item;
+}
+
+private string GetDateTime(){
+    string datetime="";
+    string date_pattern = "yyyyMMdd_hhmmss";
+    DateTime now=DateTime.Now;
+    datetime=now.ToString(date_pattern);
+    return datetime;
+}
+private bool SetWorkSheetContent(){
+    try{
+        string sql=@"select part.item_number,part.cn_sizeone,part.cn_sizetwo,part.cn_thickness,part.name,part.cn_is_attach
+                    from [innovator].[Work_Order_Application_Form] as woap
+                    inner join [innovator].[W_WORK_ORDER] as w_wo on w_wo.SOURCE_ID = woap.id
+                    inner join [innovator].[WORK_ORDER] as wo on wo.id=w_wo.RELATED_ID
+                    inner join [innovator].[PART] as part on part.id=wo.cn_part
+                    where woap.id='{0}' AND wo.CN_PART is not null";
+        sql=String.Format(sql,form_id);
+        
+        Item ResultItem=inn.applySQL(sql);
+        if(ResultItem.isError()){
+            ErrorMessage=ResultItem.getErrorString();
+            return false;
+        }else{
+            temp=ResultItem;
+            for(int count=0;count< ResultItem.getItemCount();count++){
+                Item itm=ResultItem.getItemByIndex(count);
+                worksheet.Cell(2+count,1).Value=itm.getProperty("item_number","");
+                worksheet.Cell(2+count,2).Value=itm.getProperty("cn_sizeone","");
+                worksheet.Cell(2+count,3).Value=itm.getProperty("cn_sizetwo","");
+                worksheet.Cell(2+count,4).Value=itm.getProperty("cn_thickness","");
+                worksheet.Cell(2+count,5).Value=itm.getProperty("name","");
+                worksheet.Cell(2+count,6).Value=itm.getProperty("cn_is_attach","");
+            }
+        }
+        return true;
+    }catch(System.Exception ex){
+        ErrorMessage=ex.ToString();
+        return false;
+    }
+    
+}
+
+public Innovator inn;
+public string ErrorMessage="";
+public string form_id="";
+public Aras.Server.Security.Identity plmIdentity;
+public Boolean PermissionWasSet;
+public Item temp=null;
+public ClosedXML.Excel.XLWorkbook workbook = null;
+public ClosedXML.Excel.IXLWorksheet worksheet = null;
+public string savePath="";
+
+public Item main(){
+    inn= this.getInnovator();
+    string actId= this.getID();
+    savePath="E:\\ExportExcel\\WorkOrder_"+GetDateTime()+".xlsx"; //存放路徑
+    //return inn.newResult(GetDateTime());
+    //return inn.newError(this.getID());
+    //		2CBB6331571B47A799850AF882B8E320
+    plmIdentity = Aras.Server.Security.Identity.GetByName("Aras PLM");
+    PermissionWasSet = Aras.Server.Security.Permissions.GrantIdentity(plmIdentity);
+    
+    //取出目前節點的workflow物件*************************
+    Item wflItem = this.newItem("Workflow","get");
+    wflItem.setAttribute("select","source_id,source_type");
+    Item wflProc = wflItem.createRelatedItem("Workflow Process","get");
+    wflProc.setAttribute("select","name");
+    Item wflProcAct = wflProc.createRelationship("Workflow Process Activity","get");
+    wflProcAct.setAttribute("select","related_id");
+    wflProcAct.setProperty("related_id",actId);
+    wflItem = wflItem.apply();
+    form_id=wflItem.getProperty("source_id");
+    //***************************************************
+    
+    //取得該表單物件*************************************
+    Item form_item=inn.newItem("Work Order Application Form","get");
+    form_item.setID(form_id);
+    form_item=form_item.apply();
+    //***************************************************
+    
+    try{
+    //建立Excel物件*********************************************************
+    workbook = new ClosedXML.Excel.XLWorkbook();
+    worksheet = workbook.Worksheets.Add("工單列表");
+    
+    
+    
+    //建立標題----------------
+    string[] title={"料號","材質","尺寸一","尺寸二","厚度","品名","附件"};
+    for(int col=0;col< title.Count(); col++){
+        worksheet.Cell(1, col + 1).Value = title[col];
+        worksheet.Column(col + 1).AdjustToContents();
+    }
+    //-----------------------
+    
+    //建立內容---------------
+    bool rel=SetWorkSheetContent();
+    if(rel==false){
+        return inn.newError(ErrorMessage);
+    }
+    //-----------------------
+    
+    //重整欄位寬度-----------
+    for(int col=0;col< title.Count(); col++){
+        worksheet.Column(col + 1).AdjustToContents();
+    }
+    //-----------------------
+    
+    //存檔-------------------
+    workbook.SaveAs(savePath);
+    //-----------------------
+    
+    
+    //*******************************************************************
+    
+    //存回Vault******************************
+    form_item.setFileProperty("cn_excel",savePath);
+    form_item.apply("edit");
+    //***************************************
+    }catch(System.Exception ex){
+        return inn.newError(ex.ToString());
+    }
+    
+    return this;
+
