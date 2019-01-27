@@ -1,0 +1,9 @@
+1.修改CodeTree  /Client/Solutions/Project/scripts/ActivityCompletionWorksheet/ACWDialog.html 103行程式碼
+setTimeout(function() {
+	ACWArguments.dialog.dialogNode.removeAttribute("preventclose");
+	ACWArguments.dialog.close(returnValue);
+}, 0);
+
+2.修改 Method "runStartPage"
+
+3.DEMO影片 https://youtu.be/gDfQKaKR9U8

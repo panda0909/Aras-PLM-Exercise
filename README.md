@@ -7,6 +7,7 @@
 >大部分是以練習API為主的範例。
 
 >若有程式上可精進的部分，歡迎建議與討論。
+>[Youtube分享](https://www.youtube.com/user/40025146)
 
 ##Server Event
 >Itemtype Server Event
@@ -15,6 +16,9 @@
 >>[2.檢查DCO的變更項目是否重複](/Server%20Event/Itemtype%20Server%20Event/bcs_ChkReviewClassification.txt) #polyitem
 
 >>[3.在onBeforeAdd時，自動插入第幾週期](/Server%20Event/Itemtype%20Server%20Event/bcs_getWeekOfYear.txt) #weektime
+
+>>[4.在onAfterGet時，改變搜尋結果欄位顏色](/Server%20Event/Itemtype%20Server%20Event/onAfterGet_ChangeColor.cs) #color
+
 
 >Workflow Server Event
 
@@ -54,3 +58,7 @@
 >>[1.Form上的物件詳細資料](/other/item_info.txt) #detail
 
 >>[2.還原資料庫後帳號問題](/other/還原資料庫後帳號問題.txt) #sql
+
+>>[3.搜尋BOM所有子階](/other/搜尋BOM所有子階) #bom
+
+>>[4.搜尋視窗預設欄位SearchDialog](/Client%20Event/Relationship%20Event/filterSearchDialog.js)  #onSearchDialog

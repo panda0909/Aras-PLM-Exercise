@@ -1,0 +1,575 @@
+﻿<!DOCTYPE html>
+<!-- (c) Copyright by Aras Corporation, 2004-2013. -->
+<html style="border: 0;">
+<head>
+	<title></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style type="text/css">
+		@import "../../../../javascript/include.aspx?classes=spinner.css";
+		@import "../../../../public/styles/controls.css";
+
+		html, body
+		{
+			overflow: hidden;
+			height: 100%;
+		}
+
+		html, body, #toolbar, #instance, #relationships, #statusbar
+		{
+			width: 100%;
+			margin: 0px;
+			padding: 0px;
+		}
+
+		#toolbar, #instance, #relationships, #statusbar
+		{
+			float: left;
+			clear: both;
+		}
+
+		#toolbar
+		{
+			height: 31px;
+		}
+
+		#statusbar
+		{
+			height: 20px;
+		}
+	</style>
+	<link rel="stylesheet" type="text/css" href="../../../../styles/default.css" />
+	<link rel="stylesheet" type="text/css" href="../../../../styles/common.css" />
+	<script type="text/javascript" id="ScriptSet1" src="../../../../javascript/include.aspx?classes=ScriptSet1"></script>
+	<script type="text/javascript" src="../../../../javascript/include.aspx?files=TopWindowHelper"></script>
+	<script type="text/javascript">
+		// there are 3 kind of dialog: 1- Modal, 2- htmlModal(Popup), 3- built-in ;
+		var ACWDialogUtilsFactory = function () {
+
+			// private method:
+			var setArgumentsOrStatusBar = function() {
+				document.write("<iframe id=\"statusbar\" src=\"../../../../scripts/statusbar.html?xmlfile=defaultstatusbar.xml\" frameborder=\"no\" scrolling=\"no\" noresize=\"noresize\" ></iframe>");
+			};
+			var getActivityItem = function() {
+				ActivityItem = getItemFromServer("<Item type='" + ActivityType_Nm + "' id='" + ActivityID + "' action='get'/>", aras);
+			};
+
+			// public methods:
+			return {
+				ModalDialog: function() {
+
+					return {
+						setTitle: function() {
+							document.title = aras.getResource("project", "acw_dialog.activity_completion_form");
+						},
+						closeDialog: function() {
+							aras.getMostTopWindowWithAras(window).window.close();
+						},
+						needStatusBar: true,
+						setArgumentsOrStatusBar: setArgumentsOrStatusBar,
+						setOpener: function() {
+							aras.getMostTopWindowWithAras(window).opener = ACWArguments[0];
+						},
+						getActivityItem: function() {
+							ActivityItem = aras.getItemById(ActivityType_Nm, ActivityID, 0);
+						}
+					};
+				},
+				PopupDialog: function() {
+					return {
+						setTitle: function() {
+							ACWArguments.dialog.setTitle(aras.getResource("project", "acw_dialog.activity_completion_form"));
+						},
+						closeDialog: function() {
+							setTimeout(function() {
+								ACWArguments.dialog.dialogNode.removeAttribute("preventclose");
+								ACWArguments.dialog.close(returnValue);
+							}, 0);
+
+						},
+						needStatusBar: true,
+						setArgumentsOrStatusBar: setArgumentsOrStatusBar,
+						setOpener: function() {
+
+						},
+						getActivityItem: getActivityItem
+					};
+				},
+				InFormDialog: function() {
+					//public methods
+					return {
+						setTitle: function() {
+						},
+						closeDialog: function() {
+							//Modify by panda 新增關閉
+							setTimeout(function() {
+								ACWArguments.dialog.dialogNode.removeAttribute("preventclose");
+								ACWArguments.dialog.close(returnValue);
+							}, 0);
+							//-------------------------
+						},
+						needStatusBar: false,
+						setArgumentsOrStatusBar: function () {
+							var tmpAras = aras;
+							var tmpActOrActAssigmnetId = aras.getMostTopWindowWithAras(window).item.getAttribute("id");
+							var tmpRes = getItemFromServer(
+								"<Item type='Activity2' action='get' select='id'>" +
+								"<OR>" +
+								"<id>" + tmpActOrActAssigmnetId + "</id>" +
+								"<id condition='in'>SELECT source_id FROM Activity2_Assignment WHERE id='" + tmpActOrActAssigmnetId + "'</id>" +
+								"</OR>" +
+								"</Item>", tmpAras);
+							ACWArguments[0] = {};
+							ACWArguments[1] = tmpRes ? tmpRes.getAttribute("id") : "empty_id";
+						},
+						setOpener: function() {
+						},
+						getActivityItem: getActivityItem
+					};
+				}
+			};
+		}();
+
+		var isModalDialog = !!(window.frameElement && window.frameElement.dialogArguments);
+		var ACWArguments = isModalDialog ? window.frameElement.dialogArguments : parent.dialogArguments;
+		arasOriginal = ACWArguments[0].aras || TopWindowHelper.getMostTopWindowWithAras(window).aras;
+		aras = new Aras(arasOriginal);
+
+		var ACWDialogUtils;
+		//  get the necessary dialog utils in dependency from type of dialog;
+		if ("undefined" !== typeof dialogArguments && !aras) {
+			ACWDialogUtils = ACWDialogUtilsFactory.ModalDialog();
+		}
+		else if (ACWArguments && ACWArguments.isPopup) {
+			ACWDialogUtils = ACWDialogUtilsFactory.PopupDialog();
+		} else {
+			ACWDialogUtils = ACWDialogUtilsFactory.InFormDialog();
+		}
+
+	</script>
+	<script type="text/javascript" src="../../../../javascript/include.aspx?classes=/dojo.js" data-dojo-config="isDebug: false, parseOnLoad: true, baseUrl:'../../../../javascript/dojo'"></script>
+	<script type="text/javascript">
+		//
+		// How to call ACW dialog:
+		// var param = new Array();
+		// param[0] = window;
+		// param[1] = ActivityId;
+		// param.aras = aras;
+		// var res=showModalDialog('../Solutions/Project/scripts/ActivityCompletionWorksheet/ACWDialog.html',param,'dialogHeight: 760px; dialogWidth: 700px; status:0; help:0; resizable:0');
+
+		// returnValue: if Activity item is Updated/Completed successfully then hash (keys and vals see in UpdateActivity2 server-side method). Else false.
+		//              Note: If updated/Completed successfully then Project item, Activity2 item are refreshed on client if need.
+		//
+
+		//+++ Special Logic if the page is NOT used from modal dialog
+		function getItemFromServer(amlQuery, tmpAras) {
+			var tmpRes = tmpAras.soapSend("ApplyItem", amlQuery);
+			if (tmpRes.getFaultCode() != 0 || (tmpRes = tmpRes.getResult().selectSingleNode("Item")) == null) {
+				tmpAras.AlertError(tmpRes);
+			}
+			return tmpRes;
+		}
+
+		document.write("<iframe id=\"toolbar\" src=\"toolbar.html?mode=main\" style=\"border:none;\" ></iframe>");
+		document.write("<iframe id=\"instance\" style=\"border-bottom-style: none; border: none; border-right-style: none;\" ></iframe>");
+		document.write("<iframe id=\"relationships\" scrolling=\"no\" style=\"border: none; border-right-style: none;\" ></iframe>");
+
+		ACWDialogUtils.setArgumentsOrStatusBar();
+
+		//--- Special Logic if the page is NOT used from modal dialog
+
+		// +++ Global variables
+
+		ACWDialogUtils.setOpener();
+
+		var isTearOff = true;
+		var item = null;
+		var projectItemOfOpener = ACWArguments[0].projectItem; // to indicate: is the dialog opened from Project Tree
+		var ActivityID = ACWArguments[1];
+		var ActivityItem = null; //contains a full copy (clone) of activity passed to the dialog via its id
+		var ActivityItem_original; //original copy of ActivityItem
+		var isMst = "";
+		returnValue = false;
+
+		ACWDialogUtils.setTitle();
+
+		var ActivityType_Nm = 'Activity2';
+		// --- Global variables
+
+		//+++ PUBLIC METHODS +++
+		function MarkTabToDisplay(relationshipName, relationshipGridSrc, relationshipGridSrcParameters, bDoDisplayTab)
+			//Required params: relationshipName
+			//Note: MUST be called before tabs loading (for example from ACW onload event).
+			{
+				var obj;
+				if (bDoDisplayTab === undefined) bDoDisplayTab = true;
+
+				if (bDoDisplayTab) {
+					obj = { name: relationshipName, src: relationshipGridSrc, srcParams: relationshipGridSrcParameters };
+					for (var i = 0; i < relshipsMetaData.length; i++) {
+						if (obj && relationshipName == relshipsMetaData[i].name) {
+							relshipsMetaData[i] = obj;
+							obj = null;
+						}
+					}
+					if (obj) relshipsMetaData.push(obj);
+					atLeastOneTabExists = true;
+				}
+				else {
+					var filteredArr = new Array();
+					for (var i = 0; i < relshipsMetaData.length; i++) {
+						if (relationshipName != relshipsMetaData[i].name) {
+							filteredArr.push(relshipsMetaData[i]);
+						}
+					}
+					relshipsMetaData = filteredArr;
+				}
+			}
+		//--- PUBLIC METHODS ---
+
+		//main "init" function
+		function initActivityItem() {
+			var openedFromProjectGrid = Boolean(projectItemOfOpener);
+
+			ACWDialogUtils.getActivityItem();
+
+			if (!ActivityItem) {
+				aras.AlertError(aras.getResource("project", "acw_dialog.activity_item_not_specified"));
+				ACWDialogUtils.closeDialog();
+				return;
+			}
+
+			if (isDirty(ActivityItem)) {
+				aras.AlertError(aras.getResource("project", "acw_dialog.acw_dialog_not_open_for_unsaved_activity"));
+				ActivityItem = null;
+				ACWDialogUtils.closeDialog();
+			}
+
+			ActivityItem = ActivityItem.cloneNode(true);
+			isMst = aras.getItemProperty(ActivityItem, 'is_milestone');
+			item = ACWArguments.item = ActivityItem;
+		}
+
+		function isDirty(itmNd) {
+			var retVal = (aras.isDirtyEx(itmNd) || aras.isTempEx(itmNd));
+			retVal = (retVal || itmNd.selectSingleNode("descendant-or-self::Item[@action and @action!='get' and @action!='skip']"));
+			return retVal;
+		}
+
+		var ACWFormNm = "Activity Completion Worksheet";
+		var IsActivityEditable;
+		function showActivityItemInFrame() {
+			if (!ActivityItem) {
+				setTimeout("showItemInFrame();", 10);
+				return;
+			}
+			var acwFormNd = aras.getItem("Form", "name='" + ACWFormNm + "'", "<name>" + ACWFormNm + "</name>", 0);
+			var acwFormID = (acwFormNd) ? acwFormNd.getAttribute("id") : "";
+			if (!acwFormID) return;
+			acwFormNd = aras.getFormForDisplay(acwFormID);
+			if (!acwFormNd) return;
+			acwFormNd = acwFormNd.node;
+			if (IsActivityEditable === undefined) {
+				var idenList = aras.getIdentityList();
+				var m = aras.getItemProperty(ActivityItem, "managed_by_id");
+				IsActivityEditable = (idenList && m && idenList.indexOf(m) > -1) ? true : false;
+			}
+			
+			aras.uiShowItemInFrameEx(document.getElementById("instance").contentWindow, ActivityItem, (IsActivityEditable ? "edit" : "view"), 0, acwFormNd);
+		}
+
+		//++++ to setup relationships ++++
+		var LocationSearches;
+		var relshipsMetaData = new Array(); //an element is an object. Properties: name - (relship type name), node - RelationshipType node, src - src to reflect relationships, srcParams - parameters string
+		var actItemTypeNd;
+
+		function initMainToolbar() {
+			var tbFrm = document.getElementById("toolbar").contentWindow;
+			if (relshipsMetaData.length < 1 || !tbFrm || !tbFrm.toolbarReady) {
+				setTimeout("initMainToolbar()", 10);
+				return;
+			}
+			var idenList = aras.getIdentityList();
+			var m = aras.getItemProperty(ActivityItem, "managed_by_id");
+			var isCompleteVisible = (idenList && m && idenList.indexOf(m) > -1);
+			tbFrm.setControlVisible("complete_main", isCompleteVisible);
+		}
+
+		var atLeastOneTabExists = false
+		function initRelationships() {
+			if (!ActivityItem || !atLeastOneTabExists) {
+				setTimeout("initRelationships();", 50);
+				return;
+			}
+			actItemTypeNd = aras.getItemTypeForClient("Activity2", "name").node;
+			if (!actItemTypeNd) {
+				aras.AlertError(aras.getResource("project", "acw_dialog.failed_get_activity2"));
+				return;
+			}
+			var copyOfRelshipsMetaData = new Array();
+			for (var i = 0; i < relshipsMetaData.length; i++) {
+				var obMain = relshipsMetaData[i];
+				var ob = { name: obMain.name, src: obMain.src, srcParams: obMain.srcParams };
+				copyOfRelshipsMetaData.push(ob);
+			}
+			relshipsMetaData = new Array(); //reset values setup by public methods
+			for (var i = 0; i < copyOfRelshipsMetaData.length; i++) {
+				var nd = actItemTypeNd.selectSingleNode("Relationships/Item[@type='RelationshipType' and name='" + copyOfRelshipsMetaData[i].name + "']");
+				if (nd) {
+					var obMain = copyOfRelshipsMetaData[i];
+					var ob = { name: obMain.name, src: obMain.src, srcParams: obMain.srcParams, node: nd };
+					relshipsMetaData.push(ob);
+				}
+			}
+			LocationSearches = { relationships: "?db=" + aras.getDatabase() + "&ITName=Activity2&itemID=" + ActivityItem.getAttribute("id") + "&editMode=1&tabbar=1&toolbar=1&where=dialog" };
+			document.getElementById("relationships").contentWindow.location.replace("../../../../scripts/relationships.html");
+		}
+
+		function initItem_inRelationships() {
+			var rFr = document.getElementById("relationships").contentWindow;
+			rFr.item = ActivityItem;
+			rFr.itemTypeName = "Activity2";
+			rFr.aras = aras;
+
+			return true;
+		}
+
+		function getTabbar_inRelationships() {
+			var d = aras.uiGenerateRelationshipsTabbar("Activity2", ActivityID);
+			var xpath = "";
+			for (var i = 0; i < relshipsMetaData.length; i++) {
+				if (i > 0) xpath += " or ";
+				xpath += "@id='" + relshipsMetaData[i].node.getAttribute("id") + "'";
+			}
+			if (!xpath) {
+				d.loadXML("<tabbar/>");
+				return d;
+			}
+			var nds = d.selectNodes("/tabbar/tab[not(" + xpath + ")]");
+			for (var i = 0; i < nds.length; i++) {
+				nds[i].parentNode.removeChild(nds[i]);
+			}
+			var maxSortOrder = 1;
+			var sorder;
+			nds = d.selectNodes("/tabbar/tab[" + xpath + "]");
+			for (var i = 0; i < nds.length; i++) {
+				nds[i].setAttribute("relationships_in_db", "0");
+				sorder = parseInt(nds[i].getAttribute("sort_order"), 10);
+				if (!isNaN(sorder)) {
+					if (sorder > maxSortOrder) maxSortOrder = sorder;
+					for (var j = 0; j < relshipsMetaData.length; j++) {
+						if (relshipsMetaData[j].node.getAttribute("id") == nds[i].getAttribute("id")) relshipsMetaData[j].sort_order = sorder;
+					}
+				}
+			}
+			for (var i = 0; i < relshipsMetaData.length; i++) {
+				var r = relshipsMetaData[i].node;
+				if (!d.selectSingleNode("/tabbar/tab[@id='" + r.getAttribute("id") + "']")) {
+					//'<tab id="0C6F411768EA497B88C70508776D629A" label="Test 1" relationships_in_db="0" sort_order="1" type_name="Activity2 Comments"/>';
+					var tb = d.documentElement.appendChild(d.createElement("tab"));
+					tb.setAttribute("id", r.getAttribute('id'));
+					tb.setAttribute("relationships_in_db", "0");
+					tb.setAttribute("sort_order", maxSortOrder + (i + 1));
+					tb.setAttribute("type_name", aras.getItemProperty(r, 'name'));
+					tb.setAttribute("label", aras.getItemProperty(r, 'label'));
+				}
+			}
+			relshipsMetaData.sort(sorderSort);
+			return d;
+
+			function sorderSort(obj1, obj2) {
+				if (obj1.sort_order !== undefined && obj2.sort_order !== undefined)
+					return obj1.sort_order - obj2.sort_order;
+				return 0;
+			}
+		}
+
+		function getFirstEnabledTabID_inRelationships() {
+			var retVal = (relshipsMetaData.length > 0) ? relshipsMetaData[0].node.getAttribute("id") : undefined;
+			return retVal;
+		}
+
+		var locationSearchesIsSetup = false;
+		function getIFrameSrc_inRelationships(tabID) {
+			var rFr = document.getElementById("relationships").contentWindow;
+			if (!locationSearchesIsSetup) {
+				if (!rFr.LocationSearches) rFr.LocationSearches = {};
+				for (var i = 0; i < relshipsMetaData.length; i++) {
+					var rtId = relshipsMetaData[i].node.getAttribute("id");
+					if (relshipsMetaData[i].src) rFr.LocationSearches[rtId] = relshipsMetaData[i].srcParams;
+				}
+				locationSearchesIsSetup = true;
+			}
+			var retVal = undefined;
+			for (var i = 0; i < relshipsMetaData.length; i++) {
+				var rtId = relshipsMetaData[i].node.getAttribute("id");
+				var src = relshipsMetaData[i].src;
+				if (tabID == rtId && src) retVal = src;
+			}
+			return retVal;
+		}
+
+		var RelationshipsOverriddenFunctions = new Object();
+		RelationshipsOverriddenFunctions["initItem"] = initItem_inRelationships;
+		RelationshipsOverriddenFunctions["getTabbar"] = getTabbar_inRelationships;
+		RelationshipsOverriddenFunctions["getFirstEnabledTabID"] = getFirstEnabledTabID_inRelationships;
+		RelationshipsOverriddenFunctions["getIFrameSrc"] = getIFrameSrc_inRelationships;
+
+		//----- to setup relationships -----
+
+		//++++ Main Toolbar Commands Handling ++++
+		function processCommand(im) {
+			if (im == 'save_main') onSave();
+			else if (im == 'complete_main') onComplete();
+			else return false;
+		}
+
+		function onSave() {
+			processActivity("UpdateActivity");
+		}
+
+		function onComplete() {
+			processActivity("CompleteActivity");
+		}
+
+		function processActivity(actionNm) {
+			var ctz = aras.getItemFromServerByName("Variable", "CorporateTimeZone", "value,default_value");
+			if (!ctz) {
+				aras.AlertError(aras.getResource("project", "common.ctz_is_not_set"));
+				return;
+			}
+
+			var clientMethodRes = fireClientSideValidation(actionNm);
+			if (clientMethodRes !== undefined && !clientMethodRes) return;
+
+			var msg = ((actionNm == "UpdateActivity") ? "updating" : "completing");
+			msg = aras.getResource("project", "acw_dialog." + msg + "_activity");
+			var statusId = aras.showStatusMessage("status", msg, aras.getScriptsURL() + "../images/Progress.gif");
+			var methNm = "UpdateActivity2";
+			var itmNd = ActivityItem.ownerDocument.createElement("Item");
+			itmNd.setAttribute("type", "Method");
+			itmNd.setAttribute("action", methNm);
+			itmNd.setAttribute("impersonate", "0");
+			var bodyNd = getBodyNd(actionNm);
+			itmNd.appendChild(bodyNd);
+			var r = aras.applyItemWithFilesCheck(itmNd, window, "", aras.XPathResult());
+			aras.clearStatusMessage(statusId);
+			if (r) {
+				eval("returnValue=" + r.text);
+				ignoreDirtyOnClose = true;
+				if (returnValue && (returnValue.isProjectUpdated || returnValue.isActivityUpdated)) {
+					var prItm;
+					if (projectItemOfOpener)
+						prItm = projectItemOfOpener;
+					else {
+						var prNum = aras.getItemProperty(ActivityItem, "proj_num");
+						if (prNum) {
+							var p = "project_number";
+							prItm = aras.getItem("Project", p + "='" + prNum + "'", "<" + p + ">" + prNum + "</" + p + ">");
+						}
+					}
+					if (prItm) refreshItemOnClient("Project", prItm.getAttribute("id"));
+				}
+				if (returnValue && returnValue.isActivityUpdated && !aras.hasMessage(r.ownerDocument)) {
+					refreshItemOnClient("Activity2", ActivityItem.getAttribute("id"));
+				}
+
+				var filesNds = itmNd.selectNodes("descendant-or-self::Item[@id and (@action=\"add\" or @action=\"create\")]");
+				for (var i = 0; i < filesNds.length; i++)
+					refreshItemOnClient("File", filesNds[i].getAttribute("id"));
+
+				if (window.onCompleteHandler) {
+					window.onCompleteHandler();
+				}
+				ACWDialogUtils.closeDialog();
+			}
+
+			function getBodyNd(actionNm) {
+				var ActivityItem_toSend = ActivityItem.cloneNode(true);
+				ActivityItem_toSend.setAttribute("action", actionNm);
+
+				var currentUserNd = ActivityItem_toSend.ownerDocument.createElement("CurrentUserId");
+				currentUserNd.text = aras.getUserID();
+				ActivityItem_toSend.appendChild(currentUserNd);
+				return ActivityItem_toSend;
+			}
+
+			function refreshItemOnClient(tp, id) {
+				aras.removeFromCache(id);
+				var wnd = aras.uiFindWindowEx(id);
+				if (!wnd) return;
+				var itmNd = aras.getItemById(tp, id);
+				if (itmNd) {
+					var mode = (aras.isLockedByUser(itmNd)) ? "edit" : "view";
+					aras.uiReShowItem(id, id, mode);
+				}
+			}
+			function fireClientSideValidation(actionName) {
+				var methNm = "ACW Validation";
+				var methNd = aras.getItem("Method", "name='" + methNm + "'", "<name>" + methNm + "</name>", 0);
+				if (!methNd) aras.AlertError(aras.getResource("project", "acw_dialog.method_not_found", methNm));
+				var code = aras.getItemProperty(methNd, "method_code");
+				var handler = new Function("inItem", "actionName", code);
+				var retValue = undefined;
+				try {
+					retValue = handler(ActivityItem, actionName);
+				}
+				catch (excep) {
+					aras.AlertError(aras.getResource("project", "acw_dialog.method_failed", methNm, excep.description));
+					return false;
+				}
+				return retValue;
+			}
+		}
+		//---- Main Toolbar Commands Handling ----
+		var ignoreDirtyOnClose = false;
+		onbeforeunload = function onbeforeunload_hdlr() {
+			if (!ignoreDirtyOnClose && isDirty(ActivityItem)) {
+				return aras.getResource("project", "acw_dialog.changes_will_be_discarded");
+			}
+		}
+
+		onunload = function onunload_hdlr() {
+			if (isDirty(ActivityItem)) {
+				aras.removeFromCache(ActivityItem.getAttribute("id"));
+			}
+			if (itemKey2RegisterWnd) {
+				aras.uiUnregWindowEx(itemKey2RegisterWnd, window);
+			}
+		}
+
+		onload = function onload_handler() {
+			
+			initActivityItem(); //main init
+			showActivityItemInFrame();
+			initRelationships();
+			initMainToolbar();
+
+			//++A hot fix for IR-011307 "NSK: Project ACW - Deliverables grid doesn't showed keyed Name";
+
+			itemKey2RegisterWnd = ActivityID + "_ShowFormAsADialog_" + aras.generateNewGUID();
+			aras.uiRegWindowEx(itemKey2RegisterWnd, window);
+			fixSize();
+		}
+		function fixSize() {
+			var toolbarFrame = document.getElementById("toolbar"),
+				instanceFrame = document.getElementById("instance"),
+				relationshipsFrame = document.getElementById("relationships"),
+				statusbarFrame = document.getElementById("statusbar"),
+				height = document.body.offsetHeight,
+				width = document.body.offsetWidth;
+			toolBarHeight = toolbarFrame.clientHeight;
+			statusBarHeight = statusbarFrame.clientHeight;
+			ACWDialogUtils.needStatusBar ? statusbarFrame.style.height = statusBarHeight + "px" : null;
+			toolbarFrame.style.height = toolBarHeight + "px";
+			instanceFrame.style.height = relationshipsFrame.style.height = (height - toolBarHeight - (ACWDialogUtils.needStatusBar ? statusBarHeight : 0)) / 2 + "px";
+			instanceFrame.style.width = relationshipsFrame.style.width = ACWDialogUtils.needStatusBar ? statusbarFrame.style.width : width = toolbarFrame.style.width = width + "px";
+		}
+		window.addEventListener("load", function () {
+			document.getElementById("dimmer_spinner").style.display = "none";
+		});
+	</script>
+</head>
+<body onresize="fixSize();">
+	<iframe id="dimmer_spinner" src="../../../../scripts/spinner.html"></iframe>
+</body>
+</html>
