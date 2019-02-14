@@ -9,7 +9,7 @@
 >若有程式上可精進的部分，歡迎建議與討論。
 >[Youtube分享](https://www.youtube.com/user/40025146)
 
-##Server Event
+## Server Event
 >Itemtype Server Event
 >>[1.檢查Part的BOM列表中所有的Part，cn_group_id是否都與第一個Part相同](/Server%20Event/Itemtype%20Server%20Event/bcs_AutoBOMAddGroupId.txt) #relationship #update
 
@@ -35,7 +35,7 @@
 >>[1.在生命週期的流程上，用程式啟動workflow](/Server%20Event/Lifecycle%20Server%20Event/bcs_create_workflow.txt) #instantiateWorkflow
 
 
-##Client Event
+## Client Event
 >Action
 
 >>[1.取得領號規則，並且依據Itemtype欄位的iq_temprary_preamble值選擇領取P0 or H0之領號規則，並存入表單item_number欄位](/Client%20Event/Action/bcs_AutoNumberingAction.js) #item_number #sequence
@@ -54,7 +54,7 @@
 
 >>[2.在表單開啟時，載入包含換行字串的內容](/Client%20Event/Form%20Event/bcs_Notify_Tech_addContent.txt) #text
 
-##Other
+## Other
 >>[1.Form上的物件詳細資料](/other/item_info.txt) #detail
 
 >>[2.還原資料庫後帳號問題](/other/還原資料庫後帳號問題.txt) #sql
