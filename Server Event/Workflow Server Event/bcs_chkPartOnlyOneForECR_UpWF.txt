@@ -3,9 +3,9 @@
 'Type:VB
 'Event: [ECR] => workflow server event =>onActivite
 'Comments:v0.1 Developed By Panda @Broadway 2016/12/14
-//目的:利用程式推動工作流程節點
-//===============================================================
-//======公開程式碼不負責維護，只提供程式參考與學習===============
+' //目的:利用程式推動工作流程節點
+' //===============================================================
+' //======公開程式碼不負責維護，只提供程式參考與學習===============
 'System.Diagnostics.Debugger.Break()
 
 
@@ -16,11 +16,10 @@ Dim errorResult as String=""
 Dim qItem as Item = Nothing
 Dim i as Integer ,j as Integer
 
-try
 
 query="select ecr.item_number,a.id,a.KEYED_NAME,a.state,aa.id as aa_id,wpp.id as wpp_id,wpp.name as wpp_name "
 query+="from [innovator].[workflow] as w "
-query+="inner join [innovator].[ECR] as ecr on ecr.id = w.SOURCE_ID "
+query+="inner join [innovator].[Express_DCO] as ecr on ecr.id = w.SOURCE_ID "
 query+="inner join [innovator].[WORKFLOW_PROCESS] as wp on wp.id = w.RELATED_ID "
 query+="inner join [innovator].[WORKFLOW_PROCESS_ACTIVITY] as wpa on wpa.source_id = wp.id "
 query+="inner join [innovator].[activity] as a on a.id = wpa.related_id "
@@ -30,19 +29,22 @@ query+="where ecr.id='" & Me.getID() & "' and a.state='Active'"
 qItem=inn.applySQL(query)
 
 If Not qItem Is Nothing  Then
+    if qItem.isError() = false Then
+        return inn.newError(qItem.getErrorString())
+    End if
 	For i=0 to qItem.getItemCount -1
 		Dim itemAct as Item = qItem.getItemByIndex(i)
 		Dim a_id as String=itemAct.getProperty("id","")
 		Dim aa_id as String =itemAct.getProperty("aa_id","")
 
-		if itemAct.getProperty("wpp_name","")="提出審核" then		        
+		if itemAct.getProperty("wpp_name","")="end" then		        
 			
 			Dim applyActAML as string ="<AML>"
 			applyActAML+="<Item type='Activity' action='EvaluateActivity'>"
 			applyActAML+="<Activity>" & a_id & "</Activity>"
 			applyActAML+="<ActivityAssignment>" &  aa_id & "</ActivityAssignment>"
 			applyActAML+="<Paths>"
-			applyActAML+="<Path id='" & itemAct.getProperty("wpp_id","") & "'><![CDATA[提出審核]]></Path>"
+			applyActAML+="<Path id='" & itemAct.getProperty("wpp_id","") & "'><![CDATA[end]]></Path>"
 			applyActAML+="</Paths>"
 			applyActAML+="<DelegateTo>0</DelegateTo>"
 			applyActAML+="<Tasks>"
@@ -62,21 +64,16 @@ If Not qItem Is Nothing  Then
 			applyActAML+="</Tasks>"
 			applyActAML+="<Variables/>"
 			applyActAML+="<Authentication mode=''/>"
-			applyActAML+="<Comments><![CDATA[提出審核]]></Comments>"
+			applyActAML+="<Comments><![CDATA[end]]></Comments>"
 			applyActAML+="<Complete>1</Complete>"
 			applyActAML+="</Item>"
 			applyActAML+="</AML>"
 			
 			 itemAct= inn.applyAML(applyActAML)
-			'if itemAct Is Nothing then return inn.newError("推關失敗")
+			if itemAct Is Nothing then return inn.newError("推關失敗")
 		end if
 	Next
 Else
-msgbox("讀取不到工作流程")
+    if qItem Is Nothing then return inn.newError("讀取路徑失敗")
 End If
-
-
-return Me
-catch ex As Exception
-Throw New Exception(ex.Message)
-end try
+Return Me
