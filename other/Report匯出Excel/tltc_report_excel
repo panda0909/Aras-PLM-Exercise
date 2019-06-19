@@ -1,0 +1,25 @@
+
+var inn = aras.newIOMInnovator();
+var topWnd = aras.getMostTopWindowWithAras(window);
+topWnd = topWnd.main || topWnd;
+
+var part = inn.getItemByKeyedName('Part','P01');
+report = inn.getItemByKeyedName('Report','labs_MBOMExcel');
+style = report.getProperty('xsl_stylesheet');
+html = part.applyStylesheet(style,'text');
+
+var blob = new Blob([html], {type: "application/excel"});
+if ('msSaveBlob' in window.navigator) {
+    window.navigator.msSaveBlob(blob, '_MBOM_Export.xls');
+    return;
+}
+
+var link = document.createElement('a');
+link.href = URL.createObjectURL(blob);
+link.download =  '_MBOM_Export.xls';
+link.setAttribute('type',  "application/excel");
+
+var e = document.createEvent('MouseEvents');
+e.initEvent('click' ,true ,true);
+link.dispatchEvent(e);
+   
