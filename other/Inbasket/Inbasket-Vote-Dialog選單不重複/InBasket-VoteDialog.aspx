@@ -317,7 +317,19 @@
 					newOption.text = path_label;
 					newOption.textname = path_name;
 					newOption.value = path_id;
-					voteList.options[voteIndex++] = newOption;
+					//voteList.options[voteIndex++] = newOption;
+
+					//=====重複名稱不加入選單====
+                    var bolCheckReuse=false;
+                    for(var v=0;v<voteList.options.length;v++){
+                        if(voteList.options[v].text==newOption.text){
+                            bolCheckReuse=true;
+                        }
+                    }
+                    if(bolCheckReuse==false){
+                        voteList.options[voteIndex++] = newOption;
+                    }
+                    //=====重複名稱不加入選單END====
 				}
 			}
 
