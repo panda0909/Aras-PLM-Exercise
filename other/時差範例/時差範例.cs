@@ -19,3 +19,15 @@ Corporate DateTime = {6}
 result = string.Format(result,zone,code,LanguageSuffix,LanguageCode
                     ,offset_minutes,saveNow,corporate);
 return this.getInnovator().newResult(result.ToString());
+
+/*
+<Result>
+TimeZone = Taipei Standard Time
+Locale = zh-TW
+LanguageSuffix = _zt
+LanguageCode = zt
+CorporateToLocalOffset = 0
+DateTime.Now = 7/30/2019 10:05:16 AM
+Corporate DateTime = 7/30/2019 10:05:16 AM
+</Result>
+ */
