@@ -18,6 +18,10 @@ Corporate DateTime = {6}
 ";
 result = string.Format(result,zone,code,LanguageSuffix,LanguageCode
                     ,offset_minutes,saveNow,corporate);
+
+//當寫入時間時，請用24小時制
+//例如
+// this.setProperty("closed_on",saveNow.ToString("yyyy-MM-ddTHH:mm:ss"));
 return this.getInnovator().newResult(result.ToString());
 
 /*
