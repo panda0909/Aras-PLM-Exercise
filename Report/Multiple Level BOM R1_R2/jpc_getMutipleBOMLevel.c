@@ -15,117 +15,175 @@ private Item main(Item thisItem){
     Item result=inn.newItem();
     if(report.isError()==false){
         string aml = @"<AML>
-  <Item type='Part' action='get' select='item_number,name,cn_lifecycle,cn_revision' id='{0}'>
+  <Item type='Part' action='get' select='item_number,name,cn_lifecycle,cn_revision,cn_factory' id='{0}'>
     <Relationships>
       <Item type='Part BOM' select='sort_order,quantity,related_id(item_number,name),cn_attrition_rate,cn_bom_note,reference_designator'>
         <Relationships>
           <Item action='get' type='BOM Substitute' select='id,related_id,cn_bom_note,cn_sort_order,cn_substitute_quantity,cn_substitute_shrinkrate,cn_substitute_unit,cn_substitute_shrinkrate'>
             <related_id>
-              <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision'>
+              <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision,cn_factory'>
+                <Relationships>
+                  <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                  </Item>
+                </Relationships>
               </Item>
             </related_id>
           </Item>
         </Relationships>
         <related_id>
-          <Item type='Part' select='item_number,name,cn_lifecycle,cn_revision,unit'>
+          <Item type='Part' select='item_number,name,cn_lifecycle,cn_revision,unit,cn_factory'>
             <Relationships>
               <Item type='Part BOM' select='sort_order,quantity,related_id(item_number,name),cn_bom_note,cn_attrition_rate,reference_designator'>
                 <Relationships>
                   <Item action='get' type='BOM Substitute' select='id,related_id,cn_bom_note,cn_sort_order,cn_substitute_quantity,cn_substitute_shrinkrate,cn_substitute_unit,cn_substitute_shrinkrate'>
                     <related_id>
-                      <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision'>
+                      <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision,cn_factory'>
+                        <Relationships>
+                          <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                          </Item>
+                        </Relationships>
                       </Item>
                     </related_id>
                   </Item>
+                  <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                  </Item>
                 </Relationships>
                 <related_id>
-                  <Item type='Part' select='item_number,name, cn_lifecycle,cn_revision,unit'>
+                  <Item type='Part' select='item_number,name, cn_lifecycle,cn_revision,unit,cn_factory'>
                     <Relationships>
                       <Item type='Part BOM' select='sort_order,quantity,related_id(item_number,name),cn_bom_note,cn_attrition_rate,reference_designator'>
                         <Relationships>
                           <Item action='get' type='BOM Substitute' select='id,related_id,cn_bom_note,cn_sort_order,cn_substitute_quantity,cn_substitute_shrinkrate,cn_substitute_unit,cn_substitute_shrinkrate'>
                             <related_id>
-                              <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision'>
+                              <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision,cn_factory'>
+                                <Relationships>
+                                  <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                                  </Item>
+                                </Relationships>
                               </Item>
                             </related_id>
                           </Item>
+                          <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                          </Item>
                         </Relationships>
                         <related_id>
-                          <Item type='Part' select='item_number,name, cn_lifecycle,cn_revision,unit'>
+                          <Item type='Part' select='item_number,name, cn_lifecycle,cn_revision,unit,cn_factory'>
                             <Relationships>
                               <Item type='Part BOM' select='sort_order,quantity,related_id(item_number,name),cn_attrition_rate,cn_bom_note,reference_designator'>
                                 <Relationships>
                                   <Item action='get' type='BOM Substitute' select='id,related_id,cn_bom_note,cn_sort_order,cn_substitute_quantity,cn_substitute_shrinkrate,cn_substitute_unit,cn_substitute_shrinkrate,cn_bom_note'>
                                     <related_id>
-                                      <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision'>
+                                      <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision,cn_factory'>
+                                        <Relationships>
+                                          <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                                          </Item>
+                                        </Relationships>
                                       </Item>
                                     </related_id>
                                   </Item>
+                                  <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                                  </Item>
                                 </Relationships>
                                 <related_id>
-                                  <Item type='Part' select='item_number,name, cn_lifecycle,cn_revision,unit'>
+                                  <Item type='Part' select='item_number,name, cn_lifecycle,cn_revision,unit,cn_factory'>
                                     <Relationships>
                                       <Item type='Part BOM' select='sort_order,quantity,related_id(item_number,name),cn_attrition_rate,cn_bom_note,reference_designator'>
                                         <Relationships>
                                           <Item action='get' type='BOM Substitute' select='id,related_id,cn_bom_note,cn_sort_order,cn_substitute_quantity,cn_substitute_shrinkrate,cn_substitute_unit,cn_substitute_shrinkrate'>
                                             <related_id>
-                                              <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision'>
+                                              <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision,cn_factory'>
+                                                <Relationships>
+                                                  <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                                                  </Item>
+                                                </Relationships>
                                               </Item>
                                             </related_id>
                                           </Item>
+                                          <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                                          </Item>
                                         </Relationships>
                                         <related_id>
-                                          <Item type='Part' select='item_number,name, cn_lifecycle,cn_revision,unit'>
+                                          <Item type='Part' select='item_number,name, cn_lifecycle,cn_revision,unit,cn_factory'>
                                             <Relationships>
                                               <Item type='Part BOM' select='sort_order,quantity,related_id(item_number,name),cn_attrition_rate,cn_bom_note,reference_designator'>
                                                 <Relationships>
                                                   <Item action='get' type='BOM Substitute' select='id,related_id,cn_bom_note,cn_sort_order,cn_substitute_quantity,cn_substitute_shrinkrate,cn_substitute_unit,cn_substitute_shrinkrate'>
                                                     <related_id>
-                                                      <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision'>
+                                                      <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision,cn_factory'>
+                                                        <Relationships>
+                                                          <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                                                          </Item>
+                                                        </Relationships>
                                                       </Item>
                                                     </related_id>
                                                   </Item>
+                                                  <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                                                  </Item>
                                                 </Relationships>
                                                 <related_id>
-                                                  <Item type='Part' select='item_number,name, cn_lifecycle,cn_revision,unit'>
+                                                  <Item type='Part' select='item_number,name, cn_lifecycle,cn_revision,unit,cn_factory'>
                                                     <Relationships>
                                                       <Item type='Part BOM' select='sort_order,quantity,related_id(item_number,name),cn_attrition_rate,cn_bom_note,reference_designator'>
                                                         <Relationships>
                                                           <Item action='get' type='BOM Substitute' select='id,related_id,cn_bom_note,cn_sort_order,cn_substitute_quantity,cn_substitute_shrinkrate,cn_substitute_unit,cn_substitute_shrinkrate'>
                                                             <related_id>
-                                                              <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision'>
+                                                              <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision,cn_factory'>
+                                                                <Relationships>
+                                                                  <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                                                                  </Item>
+                                                                </Relationships>
                                                               </Item>
                                                             </related_id>
                                                           </Item>
+                                                          <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                                                          </Item>
                                                         </Relationships>
                                                         <related_id>
-                                                          <Item type='Part' select='item_number,name, cn_lifecycle,cn_revision,unit'>
+                                                          <Item type='Part' select='item_number,name, cn_lifecycle,cn_revision,unit,cn_factory'>
+                                                            <Relationships>
+                                                              <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                                                              </Item>
+                                                            </Relationships>
                                                           </Item>
                                                         </related_id>
+                                                      </Item>
+                                                      <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
                                                       </Item>
                                                     </Relationships>
                                                   </Item>
                                                 </related_id>
                                               </Item>
+                                              <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                                              </Item>
                                             </Relationships>
                                           </Item>
                                         </related_id>
+                                      </Item>
+                                      <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
                                       </Item>
                                     </Relationships>
                                   </Item>
                                 </related_id>
                               </Item>
+                              <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+                              </Item>
                             </Relationships>
                           </Item>
                         </related_id>
+                      </Item>
+                      <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
                       </Item>
                     </Relationships>
                   </Item>
                 </related_id>
               </Item>
+              <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
+              </Item>
             </Relationships>
           </Item>
         </related_id>
+      </Item>
+      <Item action='get' type='Part AML' select='related_id(manufacturer_name)'>
       </Item>
     </Relationships>
   </Item>
