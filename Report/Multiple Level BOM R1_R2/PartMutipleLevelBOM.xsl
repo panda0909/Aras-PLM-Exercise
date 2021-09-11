@@ -68,7 +68,7 @@
 						
 						<table border="0" cellspacing="0" cellpadding="0" width="850" id="headerTable">
 							<tr valign="bottom">
-								<td colspan="18" style="font-family:helvetica;font-size:15pt;color:#DA1943;padding:2px;" align="left" uniqueID="ms__id79">Mutiple Level BOM </td>
+								<td colspan="20" style="font-family:helvetica;font-size:15pt;color:#DA1943;padding:2px;" align="left" uniqueID="ms__id79">Mutiple Level BOM </td>
 								<td colspan="1" style="font-family:helvetica;font-size:10pt;padding:2px;" align="right" uniqueID="ms__id80">
 									<button id="btnExport" onclick="fnExcelReport();">EXPORT</button>
 								</td>
@@ -86,6 +86,8 @@
 								<td class="cellHeader" uniqueID="ms__id88">Subsititue</td>
 								<td class="cellHeader" uniqueID="ms__id88">Shrinkrate</td>
 								<td class="cellHeader" uniqueID="ms__id88">BOM Note</td>
+								<td class="cellHeader" uniqueID="ms__id88">Factory</td>
+								<td class="cellHeader" uniqueID="ms__id88">Manufacturer Name</td>
 							</tr>
 							<xsl:call-template name="Levels"/>
 						</table>
@@ -326,13 +328,13 @@
 							<xsl:text> </xsl:text>
 						</xsl:if>
 					</td>
-					            <td class="cellSolidRightBottom" style="font-family:helvetica; font-size:8pt; padding:2px;" align="center" uniqueID="ms__id27">
+					<td class="cellSolidRightBottom" style="font-family:helvetica; font-size:8pt; padding:2px;" align="center" uniqueID="ms__id27">
 						<xsl:value-of select="cn_lifecycle"/>
 						<xsl:if test="cn_lifecycle='' or not(cn_lifecycle)">
 							<xsl:text> </xsl:text>
 						</xsl:if>
 					</td>
-					            <td class="cellSolidRightBottom" style="font-family:helvetica; font-size:8pt; padding:2px;" align="center" uniqueID="ms__id27">
+					<td class="cellSolidRightBottom" style="font-family:helvetica; font-size:8pt; padding:2px;" align="center" uniqueID="ms__id27">
 						<xsl:value-of select="cn_revision"/>
 						<xsl:if test="cn_revision='' or not(cn_revision)">
 							<xsl:text> </xsl:text>
@@ -462,6 +464,18 @@
 								<xsl:text> </xsl:text>
 							</xsl:otherwise>
 						</xsl:choose>
+					</td>
+					<td class="cellSolidRightBottom" style="font-family:helvetica; font-size:8pt; padding:2px;" align="center" uniqueID="ms__id27">
+						<xsl:value-of select="cn_factory"/>
+						<xsl:if test="cn_factory='' or not(cn_factory)">
+							<xsl:text> </xsl:text>
+						</xsl:if>
+					</td>
+					<td class="cellSolidRightBottom" style="font-family:helvetica; font-size:8pt; padding:2px;" align="center" uniqueID="ms__id27">
+						<xsl:value-of select="Relationships/Item[@type='Part AML']/related_id/Item/manufacturer_name"/>
+						<xsl:if test="Relationships/Item[@type='Part AML']/related_id/Item/manufacturer_name='' or not(./Relationships/Item[@type='Part AML']/related_id/Item/manufacturer_name)">
+							<xsl:text> </xsl:text>
+						</xsl:if>
 					</td>
 				</tr>
 			</xsl:template>
