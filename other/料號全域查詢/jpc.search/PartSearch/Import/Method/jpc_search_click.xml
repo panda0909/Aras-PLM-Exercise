@@ -1,0 +1,736 @@
+﻿<AML>
+ <Item type="Method" id="77E5BCB944AD4BDC9A17EAA3BA5AD238" action="add">
+  <comments>JPC 搜尋物件編號相關資料</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[var inn = new Innovator();
+var topWnd = aras.getMostTopWindowWithAras(window);
+topWnd = topWnd.main || topWnd;
+
+var txtSearch_number = document.getElementsByName("search_number")[1];
+var divResult = document.getElementById('result');
+divResult.innerHTML = "<div id='jpc_result'></div>";
+var divConent = document.getElementById('jpc_result');
+var logs = "";
+if(txtSearch_number.value===""){
+    aras.AlertError("Search Value is null.");
+}
+function Log(msg){
+     var log = inn.newItem("JPC_Method_Log","add");
+     log.setProperty("jpc_run_method","JPC_ImportBOMClick");
+     log.setProperty("jpc_method_event","onclick");
+     log.setProperty("jpc_log",msg);
+     log = log.apply();
+}
+function GetPart(content){
+    var aml = "<AML>\
+                <Item action='get' type='Part' maxRecords='10'>\
+                    <or>\
+                    <item_number condition='like'>"+content+"</item_number>\
+                    <name condition='like'>"+content+"</name>\
+                    </or>\
+                </Item>\
+                </AML>";
+    return inn.applyAML(aml);
+}
+function GetCAD(content){
+    var aml = "<AML>\
+                <Item action='get' type='CAD' maxRecords='10'>\
+                    <or>\
+                    <item_number condition='like'>"+content+"</item_number>\
+                    <name condition='like'>"+content+"</name>\
+                    </or>\
+                </Item>\
+                </AML>";
+    return inn.applyAML(aml);
+}
+function GetDOC(content){
+    var aml = "<AML>\
+                <Item action='get' type='Document' maxRecords='10'>\
+                    <or>\
+                    <item_number condition='like'>"+content+"</item_number>\
+                    <name condition='like'>"+content+"</name>\
+                    </or>\
+                </Item>\
+                </AML>";
+    return inn.applyAML(aml);
+}
+function GetEN(content){
+    var aml = "<AML>\
+                <Item action='get' type='Express DCO' maxRecords='100' orderBy='created_on DESC'>\
+                    <Relationships>\
+                    <Item action='get' type='Express DCO Affected Item'>\
+                        <related_id>\
+                        <Item type='Affected Item' action='get'>\
+                            <or>\
+                            <affected_id>\
+                                <Item type='Change Controlled Item' action='get'>\
+                                <item_number condition='like'>"+content+"</item_number>\
+                                </Item>\
+                            </affected_id>\
+                            <new_item_id>\
+                            <Item type='Change Controlled Item' action='get'>\
+                                <item_number condition='like'>"+content+"</item_number>\
+                                </Item>\
+                            </new_item_id>\
+                            </or>\
+                        </Item>\
+                        </related_id>\
+                    </Item>\
+                    </Relationships>\
+                </Item>\
+                </AML>";
+    return inn.applyAML(aml);
+}
+function GetECN(content){
+    var aml = "<AML>\
+                <Item action='get' type='ECN' maxRecords='100' orderBy='created_on DESC'>\
+                    <Relationships>\
+                    <Item action='get' type='ECN Affected Item'>\
+                        <related_id>\
+                        <Item type='Affected Item' action='get'>\
+                            <or>\
+                            <affected_id>\
+                                <Item type='Change Controlled Item' action='get'>\
+                                <item_number condition='like'>"+content+"</item_number>\
+                                </Item>\
+                            </affected_id>\
+                            <new_item_id>\
+                            <Item type='Change Controlled Item' action='get'>\
+                                <item_number condition='like'>"+content+"</item_number>\
+                                </Item>\
+                            </new_item_id>\
+                            </or>\
+                        </Item>\
+                        </related_id>\
+                    </Item>\
+                    </Relationships>\
+                </Item>\
+                </AML>";
+    return inn.applyAML(aml);
+}
+function GetECR(content){
+    var aml = "<AML>\
+                <Item action='get' type='ECR' maxRecords='100' orderBy='created_on DESC'>\
+                    <Relationships>\
+                    <Item action='get' type='ECR Affected Item'>\
+                        <related_id>\
+                        <Item type='Affected Item' action='get'>\
+                            <or>\
+                            <affected_id>\
+                                <Item type='Change Controlled Item' action='get'>\
+                                <item_number condition='like'>"+content+"</item_number>\
+                                </Item>\
+                            </affected_id>\
+                            <new_item_id>\
+                            <Item type='Change Controlled Item' action='get'>\
+                                <item_number condition='like'>"+content+"</item_number>\
+                                </Item>\
+                            </new_item_id>\
+                            </or>\
+                        </Item>\
+                        </related_id>\
+                    </Item>\
+                    </Relationships>\
+                </Item>\
+                </AML>";
+    return inn.applyAML(aml);
+}
+function GetCA(content){
+    var aml = "<AML>\
+                <Item action='get' type='Simple ECO' maxRecords='100' orderBy='created_on DESC'>\
+                    <Relationships>\
+                    <Item action='get' type='Simple ECO Affected Item'>\
+                        <related_id>\
+                        <Item type='Affected Item' action='get'>\
+                            <or>\
+                            <affected_id>\
+                                <Item type='Change Controlled Item' action='get'>\
+                                <item_number condition='like'>"+content+"</item_number>\
+                                </Item>\
+                            </affected_id>\
+                            <new_item_id>\
+                            <Item type='Change Controlled Item' action='get'>\
+                                <item_number condition='like'>"+content+"</item_number>\
+                                </Item>\
+                            </new_item_id>\
+                            </or>\
+                        </Item>\
+                        </related_id>\
+                    </Item>\
+                    </Relationships>\
+                </Item>\
+                </AML>";
+    return inn.applyAML(aml);
+}
+function GetPartCAD(content){
+    var aml = "<AML>\
+                <Item action='get' type='Part CAD'>\
+                    <source_id>\
+                    <Item type='Part' action='get'>\
+                    <item_number  condition='like'>"+content+"</item_number>\
+                    <is_current>1</is_current>\
+                    </Item>\
+                    </source_id>\
+                    <related_id>\
+                    <Item type='CAD' action='get'>\
+                        <Relationships>\
+                        <Item action='get' type='cad files'>\
+                        </Item>\
+                        </Relationships>\
+                    </Item>\
+                    </related_id>\
+                </Item>\
+                </AML>";
+    return inn.applyAML(aml);
+}
+function GetPartDoc(content){
+    var aml = "<AML>\
+                <Item action='get' type='Part Document'>\
+                    <source_id>\
+                    <Item type='Part' action='get'>\
+                    <item_number  condition='like'>"+content+"</item_number>\
+                    <is_current>1</is_current>\
+                    </Item>\
+                    </source_id>\
+                    <related_id>\
+                    <Item type='Document' action='get'>\
+                        <Relationships>\
+                        <Item action='get' type='Document File'>\
+                        </Item>\
+                        </Relationships>\
+                    </Item>\
+                    </related_id>\
+                </Item>\
+                </AML>";
+    return inn.applyAML(aml);
+}
+function GetPartFile(content){
+    var aml = "<AML>\
+                <Item action='get' type='Part File'>\
+                    <source_id>\
+                    <Item type='Part' action='get'>\
+                    <item_number  condition='like'>"+content+"</item_number>\
+                    <is_current>1</is_current>\
+                    </Item>\
+                    </source_id>\
+                    <related_id>\
+                    <Item type='File' action='get'>\
+                    </Item>\
+                    </related_id>\
+                </Item>\
+                </AML>";
+    return inn.applyAML(aml);
+}
+function GetWhereBOM(item_number){
+    var aml = "<AML>\
+            <Item action='get' type='Part BOM' select='sort_order,quantity,source_id(item_number,name),related_id,cn_attrition_rate,cn_bom_note,reference_designator'>\
+                <source_id>\
+                <Item type='Part' action='get' select='id,item_number,name,cn_lifecycle,cn_revision,cn_part_note,classification,release_date,cn_factory,unit'>\
+                <is_current>1</is_current>\
+                </Item>\
+                </source_id>\
+                <related_id>\
+                <Item type='Part' action='get' select='id,item_number'>\
+                    <item_number>"+item_number+"</item_number>\
+                </Item>\
+                </related_id>\
+            </Item>\
+        </AML>";
+
+    var itmPartBOM = inn.applyAML(aml);
+
+    var html = "";
+    if(itmPartBOM.isError()==false){
+        html += ApplyReport("JPC Where Used BOM",itmPartBOM);
+    }
+    
+    return html;
+}
+function OpenData(strType,strId){
+    itm = top.aras.getItemById(strType, strId , 0);
+    top.aras.uiShowItemEx(itm, undefined, true);
+}
+function ConvertHead(arrhead){
+    var thead = document.createElement("thead");
+    var tr = document.createElement("tr");
+    
+    for(var i=0;i<arrhead.length;i++){
+        var td = document.createElement("td");
+        td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+        td.innerText = arrhead[i];
+        tr.appendChild(td);
+    }
+    thead.appendChild(tr);
+
+    return thead;
+}
+function ConvertTableHTML(itms,itemtype){
+    var html = document.createElement("h1");
+    
+    var table = document.createElement("table");
+    table.setAttribute("style","border-collapse:collapse;");
+    var thead = document.createElement("thead");
+    var tbody = document.createElement("tbody");
+    switch(itemtype){
+        case "Part":
+            thead = ConvertHead(["物件編號","規格品名","Lifecycle","Revision","State"]);
+        break;
+        case "Part CAD":
+            thead = ConvertHead(["物件編號","規格品名","Lifecycle","Revision","State","檔案"]);
+        break;
+        case "Part Document":
+            thead = ConvertHead(["物件編號","規格品名","Lifecycle","Revision","State","檔案"]);
+        break;
+        case "Part File":
+            thead = ConvertHead(["檔案名稱"]);
+        break;
+        case "CAD":
+            thead = ConvertHead(["物件編號","規格品名","Lifecycle","Revision","State"]);
+        break;
+        case "Document":
+            thead = ConvertHead(["物件編號","規格品名","Lifecycle","Revision","State"]);
+        break;
+        case "Express DCO":
+            thead = ConvertHead(["物件編號","標題","State"]);
+        break;
+        case "ECN":
+            thead = ConvertHead(["物件編號","標題","State"]);
+        break;
+        case "ECR":
+            thead = ConvertHead(["物件編號","標題","State"]);
+        break;
+        case "Simple ECO":
+            thead = ConvertHead(["物件編號","標題","State"]);
+        break;
+    }
+    table.appendChild(thead);
+    for(var i=0;i<itms.getItemCount();i++){
+        var itm = itms.getItemByIndex(i);
+        if(itemtype=="Part"){
+            html.innerText="Part";
+            var tr = ConvertTr_Part(itm);
+            tbody.appendChild(tr);
+        }else if(itemtype=="CAD"){
+            html.innerText="CAD";
+            var tr = ConvertTr_CAD(itm);
+            tbody.appendChild(tr);
+        }else if(itemtype=="Document"){
+            html.innerText="Document";
+            var tr = ConvertTr_Document(itm);
+            tbody.appendChild(tr);
+        }else if(itemtype=="Express DCO"){
+            html.innerText="EN";
+            var tr = ConvertTr_ExpressDCO(itm);
+            tbody.appendChild(tr);
+        }else if(itemtype=="ECN"){
+            html.innerText="ECN";
+            var tr = ConvertTr_ECN(itm);
+            tbody.appendChild(tr);
+        }else if(itemtype=="ECR"){
+            html.innerText="ECR";
+            var tr = ConvertTr_ECR(itm);
+            tbody.appendChild(tr);
+        }else if(itemtype=="Simple ECO"){
+            html.innerText="CA";
+            var tr = ConvertTr_SimpleECO(itm);
+            tbody.appendChild(tr);
+        }else if(itemtype=="Part CAD"){
+            html.innerText="Part CAD";
+            var tr = ConvertTr_PartCAD(itm);
+            tbody.appendChild(tr);
+        }else if(itemtype=="Part Document"){
+            html.innerText="Part Document";
+            var tr = ConvertTr_PartDoc(itm);
+            tbody.appendChild(tr);
+        }else if(itemtype=="Part File"){
+            html.innerText="Part File";
+            var tr = ConvertTr_PartFile(itm);
+            tbody.appendChild(tr);
+        }
+    }
+    table.appendChild(tbody);
+    html.appendChild(table);
+    return html;
+}
+function ConvertTr_Part(itm){
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    var a = document.createElement("a");
+    a.setAttribute("onclick","top.aras.uiShowItem('Part','"+itm.getProperty("id","")+"')")
+    a.innerText=itm.getProperty("item_number","");
+    td.appendChild(a);
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("name","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("cn_lifecycle","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("cn_revision","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("bcs_ref_current_state_label","");
+    tr.appendChild(td);
+    return tr;
+}
+function ConvertTr_PartCAD(itm){
+    var sItm = itm.getPropertyItem("source_id");
+    var rItm = itm.getPropertyItem("related_id");
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    if(rItm==null || rItm == undefined){
+        td.innerText = "無權限";
+        tr.appendChild(td);
+        return tr;
+    }
+    
+    var a = document.createElement("a");
+    a.setAttribute("onclick","top.aras.uiShowItem('CAD','"+rItm.getProperty("id","")+"')")
+    a.innerText=rItm.getProperty("item_number","");
+    td.appendChild(a);
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = rItm.getProperty("name","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = rItm.getProperty("cn_lifecycle","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = rItm.getProperty("cn_revision","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = rItm.getProperty("bcs_ref_current_state_label","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    var cadfiles = rItm.getRelationships("cad files");
+    if(cadfiles.isError()==false){
+        for(var i=0;i<cadfiles.getItemCount();i++){
+            var itmFileRel = cadfiles.getItemByIndex(i);
+            var itmFile = itmFileRel.getRelatedItem();
+            if(itmFile==null) continue;
+            var a_file = document.createElement("a");
+            a_file.setAttribute("onclick","top.aras.uiShowItem('File','"+itmFile.getProperty("id","")+"')")
+            a_file.innerText=itmFile.getProperty("filename","");
+            td.appendChild(a_file);
+            var br = document.createElement("br");
+            td.appendChild(br);
+        }
+    }
+    tr.appendChild(td);
+
+    return tr;
+}
+function ConvertTr_PartDoc(itm){
+    var sItm = itm.getPropertyItem("source_id");
+    var rItm = itm.getPropertyItem("related_id");
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    if(rItm==null || rItm == undefined){
+        td.innerText = "無權限";
+        tr.appendChild(td);
+        return tr;
+    }
+
+    var a = document.createElement("a");
+    a.setAttribute("onclick","top.aras.uiShowItem('Document','"+rItm.getProperty("id","")+"')")
+    a.innerText=rItm.getProperty("item_number","");
+    td.appendChild(a);
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = rItm.getProperty("name","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = rItm.getProperty("cn_lifecycle","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = rItm.getProperty("cn_revision","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = rItm.getProperty("bcs_ref_current_state_label","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    var cadfiles = rItm.getRelationships("Document File");
+    if(cadfiles.isError()==false){
+        for(var i=0;i<cadfiles.getItemCount();i++){
+            var itmFileRel = cadfiles.getItemByIndex(i);
+            var itmFile = itmFileRel.getRelatedItem();
+            if(itmFile==null) continue;
+            var a_file = document.createElement("a");
+            a_file.setAttribute("onclick","top.aras.uiShowItem('File','"+itmFile.getProperty("id","")+"')")
+            a_file.innerText=itmFile.getProperty("filename","");
+            td.appendChild(a_file);
+            var br = document.createElement("br");
+            td.appendChild(br);
+        }
+    }
+    tr.appendChild(td);
+    
+    return tr;
+}
+function ConvertTr_PartFile(itm){
+    var sItm = itm.getPropertyItem("source_id");
+    var rItm = itm.getPropertyItem("related_id");
+    var tr = document.createElement("tr");
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    if(rItm==null || rItm == undefined){
+        td.innerText = "無權限";
+        tr.appendChild(td);
+        return tr;
+    }
+    var a_file = document.createElement("a");
+    a_file.setAttribute("onclick","top.aras.uiShowItem('File','"+rItm.getProperty("id","")+"')")
+    a_file.innerText=rItm.getProperty("filename","");
+    td.appendChild(a_file);
+        
+    tr.appendChild(td);
+    
+    return tr;
+}
+function ConvertTr_CAD(itm){
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    var a = document.createElement("a");
+    a.setAttribute("onclick","top.aras.uiShowItem('CAD','"+itm.getProperty("id","")+"')")
+    a.innerText=itm.getProperty("item_number","");
+    td.appendChild(a);
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("name","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("cn_lifecycle","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("cn_revision","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("bcs_ref_current_state_label","");
+    tr.appendChild(td);
+    return tr;
+}
+function ConvertTr_Document(itm){
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    var a = document.createElement("a");
+    a.setAttribute("onclick","top.aras.uiShowItem('Document','"+itm.getProperty("id","")+"')")
+    a.innerText=itm.getProperty("item_number","");
+    td.appendChild(a);
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("name","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("cn_lifecycle","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("cn_revision","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("bcs_ref_current_state_label","");
+    tr.appendChild(td);
+    return tr;
+}
+function ConvertTr_ExpressDCO(itm){
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    var a = document.createElement("a");
+    a.setAttribute("onclick","top.aras.uiShowItem('Express DCO','"+itm.getProperty("id","")+"')")
+    a.innerText=itm.getProperty("item_number","");
+    td.appendChild(a);
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("title","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("bcs_ref_current_state_label","");
+    tr.appendChild(td);
+    return tr;
+}
+function ConvertTr_ECN(itm){
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    var a = document.createElement("a");
+    a.setAttribute("onclick","top.aras.uiShowItem('ECN','"+itm.getProperty("id","")+"')")
+    a.innerText=itm.getProperty("item_number","");
+    td.appendChild(a);
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("title","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("bcs_ref_current_state_label","");
+    tr.appendChild(td);
+    return tr;
+}
+function ConvertTr_SimpleECO(itm){
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    var a = document.createElement("a");
+    a.setAttribute("onclick","top.aras.uiShowItem('Simple ECO','"+itm.getProperty("id","")+"')")
+    a.innerText=itm.getProperty("item_number","");
+    td.appendChild(a);
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("title","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("bcs_ref_current_state_label","");
+    tr.appendChild(td);
+    return tr;
+}
+function ConvertTr_ECR(itm){
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    var a = document.createElement("a");
+    a.setAttribute("onclick","top.aras.uiShowItem('ECR','"+itm.getProperty("id","")+"')")
+    a.innerText=itm.getProperty("item_number","");
+    td.appendChild(a);
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("title","");
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.setAttribute("style","border: solid 1px;border-color: black;padding: 5px;");
+    td.innerText = itm.getProperty("bcs_ref_current_state_label","");
+    tr.appendChild(td);
+    return tr;
+}
+
+function GetReportStyle(name){
+    // ******Transform and display AML*****
+    var report = inn.newItem('Report',"get");
+        report.setProperty("keyed_name",name);
+        report.setAttribute("select","xsl_stylesheet");
+        report = report.apply();
+
+    var style = report.getProperty('xsl_stylesheet');
+    return style;
+}
+function ApplyReport(name,itm){
+    var style = GetReportStyle(name);
+    var html = itm.applyStylesheet(style,'text');
+    return html;
+}
+var itmParts = GetPart(txtSearch_number.value);
+var itmCADs = GetCAD(txtSearch_number.value);
+var itmDocs = GetDOC(txtSearch_number.value);
+var itmENs = GetEN(txtSearch_number.value);
+var itmECNs = GetECN(txtSearch_number.value);
+var itmECRs = GetECR(txtSearch_number.value);
+var itmCAs = GetCA(txtSearch_number.value);
+var itmPartCADs = GetPartCAD(txtSearch_number.value);
+var itmPartDocs = GetPartDoc(txtSearch_number.value);
+var itmPartFiles = GetPartFile(txtSearch_number.value);
+
+if(itmParts.isError()==false){
+    divConent.appendChild(ConvertTableHTML(itmParts,'Part'));
+}
+if(itmPartCADs.isError()==false){
+    divConent.appendChild(ConvertTableHTML(itmPartCADs,'Part CAD'));
+}
+if(itmPartDocs.isError()==false){
+    divConent.appendChild(ConvertTableHTML(itmPartDocs,'Part Document'));
+}
+if(itmPartFiles.isError()==false){
+    divConent.appendChild(ConvertTableHTML(itmPartFiles,'Part File'));
+}
+if(itmCADs.isError()==false){
+    divConent.appendChild(ConvertTableHTML(itmCADs,'CAD'));
+}
+
+if(itmDocs.isError()==false){
+    divConent.appendChild(ConvertTableHTML(itmDocs,'Document'));
+}
+
+if(itmENs.isError()==false){
+    divConent.appendChild(ConvertTableHTML(itmENs,'Express DCO'));
+}
+
+if(itmECNs.isError()==false){
+    divConent.appendChild(ConvertTableHTML(itmECNs,'ECN'));
+}
+
+if(itmECRs.isError()==false){
+    divConent.appendChild(ConvertTableHTML(itmECRs,'ECR'));
+}
+
+if(itmCAs.isError()==false){
+    divConent.appendChild(ConvertTableHTML(itmCAs,'Simple ECO'));
+}
+
+]]></method_code>
+  <method_type>JavaScript</method_type>
+  <name>jpc_search_click</name>
+ </Item>
+</AML>

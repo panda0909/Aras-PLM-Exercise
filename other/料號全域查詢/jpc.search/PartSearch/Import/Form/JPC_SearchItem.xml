@@ -1,0 +1,93 @@
+﻿<AML>
+ <Item type="Form" id="1EBFEAAEB4F54279869C6C33FEC2A313" action="add">
+  <category_form>0</category_form>
+  <description>JPC 全域搜尋器</description>
+  <height>234</height>
+  <stylesheet><![CDATA[../styles/default.css]]></stylesheet>
+  <width>699</width>
+  <name>JPC_SearchItem</name>
+  <Relationships>
+   <Item type="Body" id="861DC764E41C4E4BAA41121F723470F4" action="add">
+    <sort_order>128</sort_order>
+    <source_id keyed_name="JPC_SearchItem" type="Form">1EBFEAAEB4F54279869C6C33FEC2A313</source_id>
+    <Relationships>
+     <Item type="Field" id="61C6E0698DCD414EB7E794691F1B5493" action="add">
+      <border_width>0</border_width>
+      <display_length_unit>px</display_length_unit>
+      <field_type>button</field_type>
+      <font_color>#000000</font_color>
+      <font_family>tahoma, arial, helvetica, sans-serif</font_family>
+      <font_size>8pt</font_size>
+      <font_weight>bold</font_weight>
+      <is_disabled>0</is_disabled>
+      <is_visible>1</is_visible>
+      <label xml:lang="en">Search</label>
+      <label_position>top</label_position>
+      <list_no_blank>0</list_no_blank>
+      <sort_order>256</sort_order>
+      <source_id keyed_name="861DC764E41C4E4BAA41121F723470F4" type="Body">861DC764E41C4E4BAA41121F723470F4</source_id>
+      <tab_stop>1</tab_stop>
+      <x>148</x>
+      <y>28</y>
+      <name>btnSearch</name>
+      <Relationships>
+       <Item type="Field Event" id="770D45DFFAD64F5FB17F17BD69816D50" action="add">
+        <field_event>onclick</field_event>
+        <related_id keyed_name="jpc_search_click" type="Method">
+         <Item type="Method" action="get" select="id">
+          <name>jpc_search_click</name>
+         </Item>
+        </related_id>
+        <sort_order>128</sort_order>
+        <source_id keyed_name="btnSearch" type="Field">61C6E0698DCD414EB7E794691F1B5493</source_id>
+       </Item>
+      </Relationships>
+     </Item>
+     <Item type="Field" id="25A6473C932F4323835864A6A7C6B297" action="add">
+      <border_width>0</border_width>
+      <display_length_unit>px</display_length_unit>
+      <field_type>html</field_type>
+      <font_color>#000000</font_color>
+      <font_family>tahoma, arial, helvetica, sans-serif</font_family>
+      <font_size>8pt</font_size>
+      <font_weight>bold</font_weight>
+      <html_code><![CDATA[<div id='result'>
+<div id ='jpc_result'>
+</div>
+</div>]]></html_code>
+      <is_disabled>0</is_disabled>
+      <is_visible>1</is_visible>
+      <label_position>top</label_position>
+      <list_no_blank>0</list_no_blank>
+      <sort_order>384</sort_order>
+      <source_id keyed_name="861DC764E41C4E4BAA41121F723470F4" type="Body">861DC764E41C4E4BAA41121F723470F4</source_id>
+      <tab_stop>1</tab_stop>
+      <x>15</x>
+      <y>84</y>
+      <name>html0</name>
+     </Item>
+     <Item type="Field" id="BB0A502B3FB645698B5FD07CA5742E3C" action="add">
+      <border_width>0</border_width>
+      <display_length_unit>px</display_length_unit>
+      <field_type>text</field_type>
+      <font_color>#000000</font_color>
+      <font_family>tahoma, arial, helvetica, sans-serif</font_family>
+      <font_size>8pt</font_size>
+      <font_weight>bold</font_weight>
+      <is_disabled>0</is_disabled>
+      <is_visible>1</is_visible>
+      <label xml:lang="en">Item Number Or Name</label>
+      <label_position>top</label_position>
+      <list_no_blank>0</list_no_blank>
+      <sort_order>128</sort_order>
+      <source_id keyed_name="861DC764E41C4E4BAA41121F723470F4" type="Body">861DC764E41C4E4BAA41121F723470F4</source_id>
+      <tab_stop>1</tab_stop>
+      <x>13</x>
+      <y>20</y>
+      <name>search_number</name>
+     </Item>
+    </Relationships>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>
