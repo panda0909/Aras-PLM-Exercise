@@ -1,0 +1,16 @@
+﻿<AML>
+ <Item type="Action" id="DDACDDFA3ACD42DA9FF597CF1F2CC89D" action="add">
+  <can_execute keyed_name="JPC_OpenSearchByItemNumberCan" type="Method">C89E43B6DC4E46EDA9DA38EBCC67F0F7</can_execute>
+  <item_query />
+  <label xml:lang="en">Search By Excel</label>
+  <location>client</location>
+  <method keyed_name="JPC_OpenSearchByExcelForm" type="Method">
+   <Item type="Method" action="get" select="id">
+    <name>JPC_OpenSearchByExcelForm</name>
+   </Item>
+  </method>
+  <target>none</target>
+  <type>generic</type>
+  <name>jpc_Search_By_Excel</name>
+ </Item>
+</AML>
