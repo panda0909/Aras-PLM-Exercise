@@ -1,0 +1,62 @@
+﻿<AML>
+ <Item type="Method" id="8859704E8782419EA496CD8FEFE8176F" action="add">
+  <comments>JPC Add by 開啟變更單受影響物件加入</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[
+var prt = typeof(parent.document.item) == "object" ? parent.document : parent.parent;
+var tmpThisItem = typeof(parent.document.thisItem) == "object" ? parent.document.thisItem : parent.thisItem;
+
+if(tmpThisItem.isNew()){
+    aras.AlertError("Please save the item. 請先存檔並解鎖後再執行。");
+}
+if(tmpThisItem.isLocked()===1 || tmpThisItem.isLocked()===2){
+    aras.AlertError("The item is Lock. 物件已上鎖中");
+    return ;
+}
+
+if(tmpThisItem.getProperty("state","")==="New"){
+    var topWnd = aras.getMostTopWindowWithAras(window);
+    topWnd = topWnd.main || topWnd;
+
+
+    // get form
+    var formName = "JPC_ImportChangeData";
+    var fetchForm = this.getInnovator().newItem("Form","get");
+    fetchForm.setProperty("name",formName);
+    fetchForm = fetchForm.apply("get"); 
+
+    // check form for error
+    if (fetchForm.isError())
+        return alert("Can't find a form called " + formName);
+
+    // get form params
+    var params = {
+        title: 'Parts Change Import', 
+        formId: fetchForm.getID(),       // put your form's id here
+        aras: aras,
+        dialogWidth: 600,                // set width int
+        dialogHeight: 400,               // set height int
+        content: 'ShowFormAsADialog.html',
+        cur_item : tmpThisItem
+    };
+    topWnd.cur_item = tmpThisItem;
+
+    var callback = function(res) {
+        //Perform logic using dialog result here
+        var parentID = document.itemID;
+        var parentAction = 'edit'; // or 'view'
+        top.aras.uiReShowItem(parentID,parentID,parentAction,'tab view');
+        return ;
+    }
+    // call form in dialog
+    topWnd.ArasModules.MaximazableDialog.show("iframe", params).promise.then(callback);
+
+    return null;
+}else{
+    aras.AlertError("Changes is not Preliminary.此非編輯系統狀態，不能執行。");
+}
+]]></method_code>
+  <method_type>JavaScript</method_type>
+  <name>JPC_OpenImportChangeData</name>
+ </Item>
+</AML>

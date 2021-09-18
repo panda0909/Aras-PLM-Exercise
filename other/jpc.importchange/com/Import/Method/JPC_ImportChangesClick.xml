@@ -1,0 +1,145 @@
+﻿<AML>
+ <Item type="Method" id="07CB7F2BAE684DF4B39B3F26B7870327" action="add">
+  <comments>JPC Add by hongming 加入受影響物件</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[var inn = new Innovator();
+var prt = typeof(parent.document.item) == "object" ? parent.document : parent.parent;
+var tmpThisItem = typeof(parent.document.thisItem) == "object" ? parent.document.thisItem : parent.thisItem;
+var topWnd = aras.getMostTopWindowWithAras(window);
+topWnd = topWnd.main || topWnd;
+
+//console.log(topWnd.dialogArguments.cur_item);
+var theItem = topWnd.cur_item;
+var changesItemtype= theItem.getAttribute("type","");
+
+var textarea_import = document.getElementsByName("txtBOM")[1];
+var textarea_log = document.getElementsByName("txtLog")[1];
+if(textarea_import.value==="" || textarea_import.value===undefined){
+    aras.AlertError("Parts List is null.");
+}
+function Log(msg){
+     var log = inn.newItem("JPC_Method_Log","add");
+     log.setProperty("jpc_run_method","JPC_ImportBOMClick");
+     log.setProperty("jpc_method_event","onclick");
+     log.setProperty("jpc_log",msg);
+     log = log.apply();
+}
+var logs = "";
+var rows = textarea_import.value.split("\n");
+
+for(var i=0;i<rows.length;i++){
+    var part_num = rows[i];
+    if(part_num==="") continue;
+    if(part_num.substring(0,1)=='D'){
+        var partItem = inn.newItem("Document","get");
+            partItem.setProperty("item_number",part_num);
+            partItem.setProperty("is_current","1");
+            partItem = partItem.apply();
+        if(partItem.isError()){
+            partItem = inn.newItem("CAD","get");
+            partItem.setProperty("item_number",part_num);
+            partItem.setProperty("is_current","1");
+            partItem = partItem.apply();
+        }
+        if(partItem.isError()==false){
+            if(partItem.getProperty("state","")==="Preliminary"){
+                var changeItem = inn.newItem("Affected Item","add");
+                    changeItem.setProperty("action","Add");
+                    changeItem.setProperty("new_item_id",partItem.getID());
+                    
+                var chkAffectItem = inn.newItem(changesItemtype+" Affected Item","get");
+                    chkAffectItem.setProperty("source_id",theItem.getID());
+                    chkAffectItem.setPropertyItem("related_id",changeItem);
+                    chkAffectItem = chkAffectItem.apply();
+                    if(chkAffectItem.isError()==true){
+                        var affectItem = inn.newItem(changesItemtype+" Affected Item","add");
+                        affectItem.setProperty("source_id",theItem.getID());
+                        affectItem.setPropertyItem("related_id",changeItem);
+                        affectItem = affectItem.apply();
+                        if(affectItem.isError()){
+                            logs+=part_num +" Error : "+affectItem.getErrorString()+"\n";
+                        }else{
+                            logs+=part_num +" OK.\n";
+                        }
+                    }
+                
+            }else{
+                var changeItem = inn.newItem("Affected Item","add");
+                    changeItem.setProperty("action","Change");
+                    changeItem.setProperty("affected_id",partItem.getID());
+                var chkAffectItem = inn.newItem(changesItemtype+" Affected Item","get");
+                    chkAffectItem.setProperty("source_id",theItem.getID());
+                    chkAffectItem.setPropertyItem("related_id",changeItem);
+                    chkAffectItem = chkAffectItem.apply();
+                if(chkAffectItem.isError()==true){
+                    var affectItem = inn.newItem(changesItemtype+" Affected Item","add");
+                        affectItem.setProperty("source_id",theItem.getID());
+                        affectItem.setPropertyItem("related_id",changeItem);
+                        affectItem = affectItem.apply();
+                        if(affectItem.isError()){
+                            logs+=part_num +" Error : "+affectItem.getErrorString()+"\n";
+                        }else{
+                            logs+=part_num +" OK.\n";
+                        }
+                }
+            }
+        }else{
+            logs+=part_num +" Error : "+partItem.getErrorString()+"\n";
+        }
+    }else{
+        //搜尋該料號
+        var partItem = inn.newItem("Part","get");
+            partItem.setProperty("item_number",part_num);
+            partItem.setProperty("is_current","1");
+            partItem = partItem.apply();
+        if(partItem.isError()){
+            logs+=part_num +" Error : "+partItem.getErrorString()+"\n";
+        }else{
+            if(partItem.getProperty("state","")==="Preliminary"){
+                var changeItem = inn.newItem("Affected Item","add");
+                    changeItem.setProperty("action","Add");
+                    changeItem.setProperty("new_item_id",partItem.getID());
+                var chkAffectItem = inn.newItem(changesItemtype+" Affected Item","get");
+                    chkAffectItem.setProperty("source_id",theItem.getID());
+                    chkAffectItem.setPropertyItem("related_id",changeItem);
+                    chkAffectItem = chkAffectItem.apply();
+                if(chkAffectItem.isError()==true){
+                    var affectItem = inn.newItem(changesItemtype+" Affected Item","add");
+                        affectItem.setProperty("source_id",theItem.getID());
+                        affectItem.setPropertyItem("related_id",changeItem);
+                        affectItem = affectItem.apply();
+                        if(affectItem.isError()){
+                            logs+=part_num +" Error : "+affectItem.getErrorString()+"\n";
+                        }else{
+                            logs+=part_num +" OK.\n";
+                        }
+                }
+            }else{
+                var changeItem = inn.newItem("Affected Item","add");
+                    changeItem.setProperty("action","Change");
+                    changeItem.setProperty("affected_id",partItem.getID());
+                var chkAffectItem = inn.newItem(changesItemtype+" Affected Item","get");
+                    chkAffectItem.setProperty("source_id",theItem.getID());
+                    chkAffectItem.setPropertyItem("related_id",changeItem);
+                    chkAffectItem = chkAffectItem.apply();
+                if(chkAffectItem.isError()==true){
+                    var affectItem = inn.newItem(changesItemtype+" Affected Item","add");
+                        affectItem.setProperty("source_id",theItem.getID());
+                        affectItem.setPropertyItem("related_id",changeItem);
+                        affectItem = affectItem.apply();
+                        if(affectItem.isError()){
+                            logs+=part_num +" Error : "+affectItem.getErrorString()+"\n";
+                        }else{
+                            logs+=part_num +" OK.\n";
+                        }
+                }
+            }
+        }
+    }
+}
+textarea_log.value = logs;
+Log(logs);]]></method_code>
+  <method_type>JavaScript</method_type>
+  <name>JPC_ImportChangesClick</name>
+ </Item>
+</AML>
